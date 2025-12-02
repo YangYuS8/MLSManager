@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Modal, Upload, message, Progress, List, Space } from 'antd'
 import { InboxOutlined, FileOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons'
-import type { UploadFile, UploadProps } from 'antd'
+import type { UploadFile, UploadProps, RcFile } from 'antd/es/upload'
 import { getToken } from '../../../utils/auth'
 
 const { Dragger } = Upload
@@ -53,7 +53,13 @@ const UploadModal: React.FC<UploadModalProps> = ({
       const file = fileList[i]
       try {
         const formData = new FormData()
-        formData.append('file', file.originFileObj as Blob)
+        // originFileObj contains the actual File object when using beforeUpload
+        // If it's a RcFile added directly, use it as is
+        const fileBlob = file.originFileObj || (file as unknown as RcFile)
+        if (!fileBlob) {
+          throw new Error('No file data available')
+        }
+        formData.append('file', fileBlob, file.name)
 
         const token = getToken()
         const response = await fetch(
@@ -72,11 +78,20 @@ const UploadModal: React.FC<UploadModalProps> = ({
           successCount++
         } else {
           const error = await response.json()
+          // Handle FastAPI validation errors (422) which return {detail: [{msg: string}]}
+          let errorMessage = t('files.uploadFailed')
+          if (error.detail) {
+            if (typeof error.detail === 'string') {
+              errorMessage = error.detail
+            } else if (Array.isArray(error.detail) && error.detail.length > 0) {
+              errorMessage = error.detail.map((e: { msg?: string }) => e.msg || '').join(', ')
+            }
+          }
           statuses[i] = {
             file: file.name,
             status: 'error',
             progress: 0,
-            error: error.detail || t('files.uploadFailed'),
+            error: errorMessage,
           }
           errorCount++
         }
@@ -111,8 +126,16 @@ const UploadModal: React.FC<UploadModalProps> = ({
   const uploadProps: UploadProps = {
     multiple: true,
     fileList,
-    beforeUpload: (file) => {
-      setFileList((prev) => [...prev, file as unknown as UploadFile])
+    beforeUpload: (file: RcFile) => {
+      // Store the RcFile with originFileObj properly set
+      const uploadFile: UploadFile = {
+        uid: file.uid,
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        originFileObj: file,
+      }
+      setFileList((prev) => [...prev, uploadFile])
       return false // Prevent auto upload
     },
     onRemove: (file) => {
