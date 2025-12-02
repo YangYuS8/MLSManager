@@ -106,3 +106,44 @@ class JobRead(JobBase):
     updated_at: datetime = Field(..., description="Last update timestamp")
 
     model_config = {"from_attributes": True}
+
+
+class JobStatusUpdate(BaseModel):
+    """Schema for worker agent to update job status."""
+
+    status: JobStatus = Field(..., description="New job status")
+    exit_code: int | None = Field(None, description="Process exit code (for completed/failed)")
+    error_message: str | None = Field(None, description="Error message if failed")
+    log_path: str | None = Field(None, description="Path to job logs on node")
+    output_path: str | None = Field(None, description="Path to job outputs on node")
+
+
+class JobStats(BaseModel):
+    """Aggregated job statistics."""
+
+    total_jobs: int = Field(..., description="Total number of jobs")
+    pending_jobs: int = Field(..., description="Jobs waiting for assignment")
+    queued_jobs: int = Field(..., description="Jobs assigned but not started")
+    running_jobs: int = Field(..., description="Currently running jobs")
+    completed_jobs: int = Field(..., description="Successfully completed jobs")
+    failed_jobs: int = Field(..., description="Failed jobs")
+    cancelled_jobs: int = Field(..., description="Cancelled jobs")
+
+
+class JobLogUpload(BaseModel):
+    """Schema for uploading job logs from worker agent."""
+
+    content: str = Field(..., description="Log content (text)")
+    append: bool = Field(
+        default=True,
+        description="Append to existing log (True) or overwrite (False)",
+    )
+
+
+class JobLogRead(BaseModel):
+    """Schema for reading job logs."""
+
+    job_id: int = Field(..., description="Job ID")
+    content: str = Field(..., description="Log content")
+    size_bytes: int = Field(..., description="Log size in bytes")
+    last_updated: datetime | None = Field(None, description="Last update time")

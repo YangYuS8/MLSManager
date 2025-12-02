@@ -121,3 +121,64 @@ class NodeRead(NodeBase):
     updated_at: datetime = Field(..., description="Last update timestamp")
 
     model_config = {"from_attributes": True}
+
+
+class NodeRegister(BaseModel):
+    """Schema for worker node self-registration."""
+
+    node_id: str = Field(
+        ...,
+        max_length=50,
+        description="Unique node identifier",
+        examples=["worker-001"],
+    )
+    name: str = Field(
+        ...,
+        max_length=100,
+        description="Human-readable node name",
+        examples=["GPU Server 1"],
+    )
+    host: str = Field(
+        ...,
+        max_length=255,
+        description="Node hostname or IP (as seen by master)",
+        examples=["192.168.1.100"],
+    )
+    port: int = Field(
+        default=8000,
+        description="Node API port",
+        examples=[8000],
+    )
+    storage_path: str | None = Field(
+        None,
+        description="Base path for data storage",
+        examples=["/data"],
+    )
+    # System info
+    cpu_count: int | None = Field(None, description="Number of CPU cores")
+    memory_total_gb: int | None = Field(None, description="Total memory in GB")
+    gpu_count: int | None = Field(None, description="Number of GPUs")
+    gpu_info: str | None = Field(None, description="GPU information")
+    storage_total_gb: int | None = Field(None, description="Total storage in GB")
+    storage_used_gb: int | None = Field(None, description="Used storage in GB")
+
+
+class NodeRegisterResponse(BaseModel):
+    """Response for node registration."""
+
+    node: NodeRead = Field(..., description="Registered node information")
+    token: str = Field(..., description="Agent authentication token")
+    message: str = Field(default="Node registered successfully")
+
+
+class NodeStats(BaseModel):
+    """Aggregated node statistics."""
+
+    total_nodes: int = Field(..., description="Total number of nodes")
+    online_nodes: int = Field(..., description="Number of online nodes")
+    offline_nodes: int = Field(..., description="Number of offline nodes")
+    total_cpu: int = Field(..., description="Total CPU cores across all nodes")
+    total_memory_gb: int = Field(..., description="Total memory in GB")
+    total_gpu: int = Field(..., description="Total GPUs")
+    total_storage_gb: int = Field(..., description="Total storage in GB")
+    used_storage_gb: int = Field(..., description="Used storage in GB")

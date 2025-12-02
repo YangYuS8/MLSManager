@@ -7,9 +7,86 @@ from sqlalchemy import select
 
 from app.api.deps import AdminUser, CurrentUser, DbSession
 from app.models.node import Node
-from app.schemas.node import NodeCreate, NodeHeartbeat, NodeRead, NodeUpdate
+from app.schemas.node import (
+    NodeCreate,
+    NodeHeartbeat,
+    NodeRead,
+    NodeRegister,
+    NodeRegisterResponse,
+    NodeStats,
+    NodeUpdate,
+)
+from app.services.node_service import NodeService
 
 router = APIRouter()
+
+
+@router.post(
+    "/register",
+    response_model=NodeRegisterResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Register worker node (self-registration)",
+    description="Called by worker agent to register itself with the master node.",
+    responses={
+        201: {"description": "Node registered successfully, returns auth token"},
+    },
+)
+async def register_worker_node(
+    db: DbSession,
+    node_in: NodeRegister,
+) -> NodeRegisterResponse:
+    """
+    Self-registration endpoint for worker agents.
+
+    This is called by the worker agent on startup to:
+    - Register the node with the master
+    - Obtain an authentication token for subsequent API calls
+
+    No authentication required for initial registration.
+    """
+    service = NodeService(db)
+
+    system_info = {
+        "cpu_count": node_in.cpu_count,
+        "memory_total_gb": node_in.memory_total_gb,
+        "gpu_count": node_in.gpu_count,
+        "gpu_info": node_in.gpu_info,
+        "storage_total_gb": node_in.storage_total_gb,
+        "storage_used_gb": node_in.storage_used_gb,
+    }
+    # Remove None values
+    system_info = {k: v for k, v in system_info.items() if v is not None}
+
+    node, token = await service.register_node(
+        node_id=node_in.node_id,
+        name=node_in.name,
+        host=node_in.host,
+        port=node_in.port,
+        storage_path=node_in.storage_path,
+        system_info=system_info if system_info else None,
+    )
+
+    return NodeRegisterResponse(
+        node=NodeRead.model_validate(node),
+        token=token,
+        message="Node registered successfully",
+    )
+
+
+@router.get(
+    "/stats",
+    response_model=NodeStats,
+    summary="Get node statistics",
+    description="Get aggregated statistics for all nodes.",
+)
+async def get_node_stats(
+    db: DbSession,
+    current_user: CurrentUser,
+) -> NodeStats:
+    """Get aggregated node statistics including resource totals."""
+    service = NodeService(db)
+    stats = await service.get_node_stats()
+    return NodeStats(**stats)
 
 
 @router.get(

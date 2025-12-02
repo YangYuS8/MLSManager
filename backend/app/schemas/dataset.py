@@ -84,3 +84,37 @@ class DatasetRead(DatasetBase):
     updated_at: datetime = Field(..., description="Last update timestamp")
 
     model_config = {"from_attributes": True}
+
+
+# ============================================================================
+# Agent/Batch Registration Schemas
+# ============================================================================
+
+
+class DatasetScanItem(BaseModel):
+    """Single dataset item from agent scan."""
+
+    name: str = Field(..., description="Dataset name (usually directory name)")
+    local_path: str = Field(..., description="Absolute path on node")
+    size_bytes: int | None = Field(None, description="Total size in bytes")
+    file_count: int | None = Field(None, description="Number of files")
+    format: str | None = Field(None, description="Detected format")
+    description: str | None = Field(None, description="Auto-generated description")
+
+
+class DatasetBatchRegister(BaseModel):
+    """Batch registration request from agent."""
+
+    datasets: list[DatasetScanItem] = Field(
+        ...,
+        description="List of scanned datasets to register",
+    )
+
+
+class DatasetBatchResult(BaseModel):
+    """Result of batch registration."""
+
+    registered: int = Field(..., description="Number of newly registered datasets")
+    updated: int = Field(..., description="Number of updated datasets")
+    failed: int = Field(..., description="Number of failed registrations")
+    errors: list[str] = Field(default_factory=list, description="Error messages")

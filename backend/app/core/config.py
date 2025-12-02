@@ -36,6 +36,9 @@ class Settings(BaseSettings):
     # CORS
     cors_origins: list[str] = ["http://localhost:5173", "http://localhost:3000"]
 
+    # Data Storage
+    data_dir: str = "./data"  # Directory for storing logs, outputs, etc.
+
     # Node Configuration
     node_type: Literal["master", "worker"] = "master"
     node_id: str = "master-001"

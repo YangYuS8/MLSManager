@@ -10,6 +10,7 @@ from app.api.v1.router import api_router
 from app.core.config import settings
 from app.core.database import async_session_maker, init_db
 from app.core.seed import seed_default_admin
+from app.tasks import start_background_tasks, stop_background_tasks
 
 # OpenAPI Tags metadata
 tags_metadata = [
@@ -57,10 +58,19 @@ async def lifespan(app: FastAPI):
         else:
             logger.debug("Default admin seeding skipped (users already exist)")
 
+    # Start background monitoring tasks (only on master node)
+    if settings.node_type == "master":
+        await start_background_tasks()
+        logger.info("Background monitoring tasks started")
+
     yield
 
     # Shutdown
     logger.info("Shutting down...")
+
+    # Stop background tasks
+    if settings.node_type == "master":
+        await stop_background_tasks()
 
 
 app = FastAPI(
