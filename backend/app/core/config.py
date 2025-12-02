@@ -45,6 +45,11 @@ class Settings(BaseSettings):
     rabbitmq_url: str = "amqp://guest:guest@localhost:5672//"
     celery_result_backend: str = "rpc://"
 
+    # Default Admin User (for development/initial setup)
+    default_admin_username: str = "mlsmanager"
+    default_admin_email: str = "admin@mlsmanager.local"
+    default_admin_password: str = "mlsmanager_secret"
+
 
 @lru_cache
 def get_settings() -> Settings:

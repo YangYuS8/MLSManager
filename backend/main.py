@@ -8,7 +8,8 @@ from loguru import logger
 
 from app.api.v1.router import api_router
 from app.core.config import settings
-from app.core.database import init_db
+from app.core.database import async_session_maker, init_db
+from app.core.seed import seed_default_admin
 
 # OpenAPI Tags metadata
 tags_metadata = [
@@ -46,6 +47,15 @@ async def lifespan(app: FastAPI):
     # Initialize database
     await init_db()
     logger.info("Database initialized")
+
+    # Seed default admin user
+    async with async_session_maker() as db:
+        if await seed_default_admin(db):
+            logger.info(
+                f"Created default admin user: {settings.default_admin_username}"
+            )
+        else:
+            logger.debug("Default admin seeding skipped (users already exist)")
 
     yield
 
