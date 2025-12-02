@@ -33,7 +33,7 @@ This repository implements a lightweight multi‑node / per‑server ML‑worksp
   - Python 3.12+  
   - FastAPI + Uvicorn (ASGI server) — supports async, high performance, hot‑reload during development. :contentReference[oaicite:5]{index=5}  
   - ORM / database layer: SQLAlchemy (or equivalent) + PostgreSQL (or SQLite for PoC)  
-  - Optional: Task queue / background jobs (e.g. Celery + Redis) — for asynchronous tasks: dataset import/download, container launch, job monitoring, inter‑node communication, metadata sync  
+  - Optional: Task queue / background jobs (e.g. Celery + RabbitMQ) — for asynchronous tasks: dataset import/download, container launch, job monitoring, inter‑node communication, metadata sync  
 - Frontend:
   - React 18 + TypeScript  
   - UI framework: Ant Design Pro (enterprise-level admin UI solution with built-in layouts, access control, and i18n)  
@@ -53,16 +53,28 @@ This repository implements a lightweight multi‑node / per‑server ML‑worksp
 ```bash
 cd frontend  
 pnpm install  
-pnpm dev          # for development (hot reload)  
-pnpm build        # build for production 
+pnpm dev              # for development (hot reload)  
+pnpm build            # build for production
+pnpm type-check       # TypeScript type checking
+pnpm lint             # run ESLint
+pnpm lint:fix         # run ESLint with auto-fix
+pnpm format           # format code with Prettier
+pnpm format:check     # check formatting without changes
+pnpm generate:api     # generate TypeScript API client from OpenAPI spec
 ```
 
 ### Backend (development)
 
 ```bash
-cd backend  
-pip install -r requirements.txt  
-uvicorn main:app --reload --host 0.0.0.0 --port 8000   # hot‑reload mode for development  
+cd backend
+
+# Using uv (recommended)
+uv sync               # install dependencies
+uv run uvicorn main:app --reload --host 0.0.0.0 --port 8000
+
+# Code quality
+uv run ruff check .   # lint Python code
+uv run ruff format .  # format Python code
 ```
 
 ### Full‑stack (Docker / docker‑compose)
@@ -75,6 +87,16 @@ docker-compose down          # stop services
 ### Worker node (agent) registration / startup
 
 ```bash
+# Development
+cd worker_agent
+uv sync               # install dependencies
+uv run python agent.py
+
+# Code quality
+uv run ruff check .   # lint Python code
+uv run ruff format .  # format Python code
+
+# Docker deployment
 # on each worker server:
 # install docker, configure environment variables (master URL, node id / secret, etc.)
 # run agent registration script or docker‑compose / container for worker_agent

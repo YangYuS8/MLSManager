@@ -1,0 +1,81 @@
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    container_name: mlsmanager-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: mlsmanager
+      POSTGRES_PASSWORD: mlsmanager_secret
+      POSTGRES_DB: mlsmanager
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mlsmanager"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # RabbitMQ (for Celery task queue)
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: mlsmanager-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: mlsmanager
+      RABBITMQ_DEFAULT_PASS: mlsmanager_secret
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API Server
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mlsmanager-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://mlsmanager:mlsmanager_secret@db:5432/mlsmanager
+      RABBITMQ_URL: amqp://mlsmanager:mlsmanager_secret@rabbitmq:5672//
+      CELERY_RESULT_BACKEND: rpc://
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+      DEBUG: ${DEBUG:-false}
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      NODE_TYPE: master
+      NODE_ID: master-001
+      CORS_ORIGINS: '["http://localhost:5173","http://localhost:3000","http://localhost:80"]'
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend (production build served by nginx)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mlsmanager-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
