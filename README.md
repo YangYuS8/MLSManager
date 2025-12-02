@@ -41,7 +41,7 @@ A lightweight multi-node ML workspace & job management system for research group
 
 #### Backend
 
-\`\`\`bash
+```bash
 cd backend
 
 # Install uv (if not installed)
@@ -52,37 +52,37 @@ cd backend
 uv sync
 cp ../.env.example .env  # Configure environment
 uv run uvicorn main:app --reload --host 0.0.0.0 --port 8000
-\`\`\`
+```
 
 #### Frontend
 
-\`\`\`bash
+```bash
 cd frontend
 pnpm install
 pnpm dev
-\`\`\`
+```
 
 Open http://localhost:5173 in your browser.
 
 #### Worker Agent
 
-\`\`\`bash
+```bash
 cd worker_agent
 uv sync
 uv run python agent.py
-\`\`\`
+```
 
 ### Code Quality
 
 #### Backend (Python)
-\`\`\`bash
+```bash
 cd backend
 uv run ruff check .      # Lint code
 uv run ruff format .     # Format code
-\`\`\`
+```
 
 #### Frontend (TypeScript/React)
-\`\`\`bash
+```bash
 cd frontend
 pnpm type-check          # TypeScript type checking
 pnpm lint                # Run ESLint
@@ -90,11 +90,11 @@ pnpm lint:fix            # Run ESLint with auto-fix
 pnpm format              # Format with Prettier
 pnpm format:check        # Check formatting
 pnpm generate:api        # Generate TypeScript API client from OpenAPI spec
-\`\`\`
+```
 
 ### Production Deployment
 
-\`\`\`bash
+```bash
 # Configure environment
 cp .env.example .env
 # Edit .env with production settings (especially SECRET_KEY)
@@ -104,11 +104,11 @@ docker-compose up -d
 
 # View logs
 docker-compose logs -f
-\`\`\`
+```
 
 ## Project Structure
 
-\`\`\`
+```
 /
 ├── backend/                 # FastAPI backend
 │   ├── app/
@@ -139,7 +139,7 @@ docker-compose logs -f
 ├── docker-compose.yml      # Production deployment (includes RabbitMQ)
 ├── .env.example            # Environment template
 └── AGENTS.md               # Project specification
-\`\`\`
+```
 
 ## API Documentation
 
@@ -152,31 +152,31 @@ When running the backend, comprehensive API documentation is available at:
 
 The frontend uses auto-generated TypeScript types from the OpenAPI spec:
 
-\`\`\`bash
+```bash
 # Ensure backend is running first
 cd frontend
 pnpm generate:api
-\`\`\`
+```
 
-This generates typed API client code in \`src/api/generated/\`.
+This generates typed API client code in `src/api/generated/`.
 
 ## Default Credentials
 
 For development, you can register a new user via the API:
 
-\`\`\`bash
+```bash
 curl -X POST http://localhost:8000/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{"username": "admin", "email": "admin@example.com", "password": "adminpass123", "role": "superadmin"}'
-\`\`\`
+```
 
 ## CI/CD
 
 GitHub Actions workflows are configured for:
-- **Backend Quality** (\`.github/workflows/backend-quality.yml\`): Runs on \`backend/**\` changes
+- **Backend Quality** (`.github/workflows/backend-quality.yml`): Runs on `backend/**` changes
   - Python linting with ruff
   - Code formatting check
-- **Frontend Quality** (\`.github/workflows/frontend-quality.yml\`): Runs on \`frontend/**\` changes
+- **Frontend Quality** (`.github/workflows/frontend-quality.yml`): Runs on `frontend/**` changes
   - TypeScript type checking
   - ESLint linting
   - Prettier formatting check
