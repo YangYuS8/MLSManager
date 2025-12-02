@@ -1,0 +1,101 @@
+# ML-Server-Manager Development Environment
+# Docker Compose configuration with hot-reload support
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    container_name: mlsmanager-dev-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: mlsmanager
+      POSTGRES_PASSWORD: mlsmanager_secret
+      POSTGRES_DB: mlsmanager
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mlsmanager"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # RabbitMQ (for Celery task queue)
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: mlsmanager-dev-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: mlsmanager
+      RABBITMQ_DEFAULT_PASS: mlsmanager_secret
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API Server (Development with hot-reload)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+      network: host
+      args:
+        - HTTP_PROXY=${HTTP_PROXY:-}
+        - HTTPS_PROXY=${HTTPS_PROXY:-}
+        - http_proxy=${HTTP_PROXY:-}
+        - https_proxy=${HTTPS_PROXY:-}
+        - NO_PROXY=${NO_PROXY:-localhost,127.0.0.1}
+    container_name: mlsmanager-dev-backend
+    restart: unless-stopped
+    env_file:
+      - .env.dev
+    environment:
+      DATABASE_URL: postgresql+asyncpg://mlsmanager:mlsmanager_secret@db:5432/mlsmanager
+      RABBITMQ_URL: amqp://mlsmanager:mlsmanager_secret@rabbitmq:5672//
+      CELERY_RESULT_BACKEND: rpc://
+    volumes:
+      # Mount source code for hot-reload
+      - ./backend:/app
+      # Exclude virtual environment
+      - /app/.venv
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  # Frontend (Development with Vite HMR)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+      network: host
+      args:
+        - HTTP_PROXY=${HTTP_PROXY:-}
+        - HTTPS_PROXY=${HTTPS_PROXY:-}
+        - http_proxy=${HTTP_PROXY:-}
+        - https_proxy=${HTTPS_PROXY:-}
+        - NO_PROXY=${NO_PROXY:-localhost,127.0.0.1}
+    container_name: mlsmanager-dev-frontend
+    restart: unless-stopped
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000
+    volumes:
+      # Mount source code for hot-reload
+      - ./frontend:/app
+      # Exclude node_modules
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_dev_data:

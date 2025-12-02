@@ -3,6 +3,9 @@ FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
 
 WORKDIR /app
 
+# Use Aliyun mirror for apt (China)
+RUN sed -i 's/deb.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list.d/debian.sources 2>/dev/null || true
+
 # Enable bytecode compilation
 ENV UV_COMPILE_BYTECODE=1
 

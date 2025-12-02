@@ -21,5 +21,9 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 include = ["agent.py", "__init__.py"]
 
+[[tool.uv.index]]
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+default = true
+
 [tool.ruff]
 extend = "ruff.toml"
