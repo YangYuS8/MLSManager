@@ -1,5 +1,7 @@
 # Change: Update README and Commit All Changes
 
+## Status: ✅ 已完成
+
 ## Why
 1. README needs to reflect new features: Swagger documentation, TypeScript API codegen, RabbitMQ, Node 22
 2. Multiple completed OpenSpec proposals need to be committed to git

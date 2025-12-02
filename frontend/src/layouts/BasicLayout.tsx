@@ -6,6 +6,7 @@ import {
   PlayCircleOutlined,
   UserOutlined,
   LogoutOutlined,
+  FolderOutlined,
 } from '@ant-design/icons'
 import { ProLayout, ProLayoutProps } from '@ant-design/pro-components'
 import { Dropdown } from 'antd'
@@ -43,6 +44,11 @@ const BasicLayout: React.FC<BasicLayoutProps> = ({ onLogout }) => {
       path: '/jobs',
       name: t('nav.jobs'),
       icon: <PlayCircleOutlined />,
+    },
+    {
+      path: '/files',
+      name: t('nav.files'),
+      icon: <FolderOutlined />,
     },
     {
       path: '/users',

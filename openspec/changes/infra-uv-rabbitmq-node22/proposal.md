@@ -1,5 +1,7 @@
 # Change: Infrastructure Improvements - uv, RabbitMQ, Node 22
 
+## Status: ✅ 已完成
+
 ## Why
 1. Backend `uv sync` fails because `pyproject.toml` references a non-existent `README.md` file
 2. Worker agent should use uv for consistency with backend

@@ -2,6 +2,7 @@
 
 import {
   type Client,
+  formDataBodySerializer,
   type Options as Options2,
   type TDataShape,
   urlSearchParamsBodySerializer,
@@ -16,26 +17,50 @@ import type {
   CancelJobApiV1JobsJobIdCancelPostData,
   CancelJobApiV1JobsJobIdCancelPostErrors,
   CancelJobApiV1JobsJobIdCancelPostResponses,
+  ChangePermissionApiV1FilesPermissionPutData,
+  ChangePermissionApiV1FilesPermissionPutErrors,
+  ChangePermissionApiV1FilesPermissionPutResponses,
+  CompressFilesApiV1FilesCompressPostData,
+  CompressFilesApiV1FilesCompressPostErrors,
+  CompressFilesApiV1FilesCompressPostResponses,
+  CopyFileApiV1FilesCopyPutData,
+  CopyFileApiV1FilesCopyPutErrors,
+  CopyFileApiV1FilesCopyPutResponses,
   CreateDatasetApiV1DatasetsPostData,
   CreateDatasetApiV1DatasetsPostErrors,
   CreateDatasetApiV1DatasetsPostResponses,
+  CreateFileOrDirectoryApiV1FilesCreatePostData,
+  CreateFileOrDirectoryApiV1FilesCreatePostErrors,
+  CreateFileOrDirectoryApiV1FilesCreatePostResponses,
   CreateJobApiV1JobsPostData,
   CreateJobApiV1JobsPostErrors,
   CreateJobApiV1JobsPostResponses,
+  DecompressArchiveApiV1FilesDecompressPostData,
+  DecompressArchiveApiV1FilesDecompressPostErrors,
+  DecompressArchiveApiV1FilesDecompressPostResponses,
   DeleteDatasetApiV1DatasetsDatasetIdDeleteData,
   DeleteDatasetApiV1DatasetsDatasetIdDeleteErrors,
   DeleteDatasetApiV1DatasetsDatasetIdDeleteResponses,
+  DeleteFilesApiV1FilesDeleteDeleteData,
+  DeleteFilesApiV1FilesDeleteDeleteErrors,
+  DeleteFilesApiV1FilesDeleteDeleteResponses,
   DeleteJobApiV1JobsJobIdDeleteData,
   DeleteJobApiV1JobsJobIdDeleteErrors,
   DeleteJobApiV1JobsJobIdDeleteResponses,
   DeleteNodeApiV1NodesNodeIdDeleteData,
   DeleteNodeApiV1NodesNodeIdDeleteErrors,
   DeleteNodeApiV1NodesNodeIdDeleteResponses,
+  DownloadFileApiV1FilesDownloadGetData,
+  DownloadFileApiV1FilesDownloadGetErrors,
+  DownloadFileApiV1FilesDownloadGetResponses,
   GetCurrentUserInfoApiV1UsersMeGetData,
   GetCurrentUserInfoApiV1UsersMeGetResponses,
   GetDatasetApiV1DatasetsDatasetIdGetData,
   GetDatasetApiV1DatasetsDatasetIdGetErrors,
   GetDatasetApiV1DatasetsDatasetIdGetResponses,
+  GetFileInfoApiV1FilesInfoGetData,
+  GetFileInfoApiV1FilesInfoGetErrors,
+  GetFileInfoApiV1FilesInfoGetResponses,
   GetJobApiV1JobsJobIdGetData,
   GetJobApiV1JobsJobIdGetErrors,
   GetJobApiV1JobsJobIdGetResponses,
@@ -63,6 +88,9 @@ import type {
   ListDatasetsApiV1DatasetsGetData,
   ListDatasetsApiV1DatasetsGetErrors,
   ListDatasetsApiV1DatasetsGetResponses,
+  ListDirectoryApiV1FilesListGetData,
+  ListDirectoryApiV1FilesListGetErrors,
+  ListDirectoryApiV1FilesListGetResponses,
   ListJobsApiV1JobsGetData,
   ListJobsApiV1JobsGetErrors,
   ListJobsApiV1JobsGetResponses,
@@ -78,9 +106,15 @@ import type {
   LoginApiV1AuthLoginPostData,
   LoginApiV1AuthLoginPostErrors,
   LoginApiV1AuthLoginPostResponses,
+  MoveFileApiV1FilesMovePutData,
+  MoveFileApiV1FilesMovePutErrors,
+  MoveFileApiV1FilesMovePutResponses,
   NodeHeartbeatApiV1NodesNodeIdHeartbeatPostData,
   NodeHeartbeatApiV1NodesNodeIdHeartbeatPostErrors,
   NodeHeartbeatApiV1NodesNodeIdHeartbeatPostResponses,
+  ReadFileApiV1FilesReadGetData,
+  ReadFileApiV1FilesReadGetErrors,
+  ReadFileApiV1FilesReadGetResponses,
   RegisterApiV1AuthRegisterPostData,
   RegisterApiV1AuthRegisterPostErrors,
   RegisterApiV1AuthRegisterPostResponses,
@@ -90,9 +124,15 @@ import type {
   RegisterWorkerNodeApiV1NodesRegisterPostData,
   RegisterWorkerNodeApiV1NodesRegisterPostErrors,
   RegisterWorkerNodeApiV1NodesRegisterPostResponses,
+  RenameFileApiV1FilesRenamePutData,
+  RenameFileApiV1FilesRenamePutErrors,
+  RenameFileApiV1FilesRenamePutResponses,
   SearchDatasetsApiV1DatasetsSearchGetData,
   SearchDatasetsApiV1DatasetsSearchGetErrors,
   SearchDatasetsApiV1DatasetsSearchGetResponses,
+  SearchFilesApiV1FilesSearchPostData,
+  SearchFilesApiV1FilesSearchPostErrors,
+  SearchFilesApiV1FilesSearchPostResponses,
   UpdateDatasetApiV1DatasetsDatasetIdPatchData,
   UpdateDatasetApiV1DatasetsDatasetIdPatchErrors,
   UpdateDatasetApiV1DatasetsDatasetIdPatchResponses,
@@ -108,9 +148,15 @@ import type {
   UpdateUserApiV1UsersUserIdPatchData,
   UpdateUserApiV1UsersUserIdPatchErrors,
   UpdateUserApiV1UsersUserIdPatchResponses,
+  UploadFileApiV1FilesUploadPostData,
+  UploadFileApiV1FilesUploadPostErrors,
+  UploadFileApiV1FilesUploadPostResponses,
   UploadJobLogsApiV1JobsJobIdLogsPostData,
   UploadJobLogsApiV1JobsJobIdLogsPostErrors,
   UploadJobLogsApiV1JobsJobIdLogsPostResponses,
+  WriteFileApiV1FilesWritePutData,
+  WriteFileApiV1FilesWritePutErrors,
+  WriteFileApiV1FilesWritePutResponses,
 } from './types.gen'
 
 export type Options<
@@ -796,6 +842,353 @@ export const getJobLogsInfoApiV1JobsJobIdLogsInfoGet = <ThrowOnError extends boo
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/jobs/{job_id}/logs/info',
     ...options,
+  })
+
+/**
+ * List Directory
+ *
+ * List contents of a directory.
+ *
+ * Returns a list of files and directories in the specified path,
+ * with support for sorting and filtering hidden files.
+ */
+export const listDirectoryApiV1FilesListGet = <ThrowOnError extends boolean = false>(
+  options?: Options<ListDirectoryApiV1FilesListGetData, ThrowOnError>
+) =>
+  (options?.client ?? client).get<
+    ListDirectoryApiV1FilesListGetResponses,
+    ListDirectoryApiV1FilesListGetErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/files/list',
+    ...options,
+  })
+
+/**
+ * Read File
+ *
+ * Read file content.
+ *
+ * Returns the content of a text file with the specified encoding.
+ * Binary files should be downloaded instead.
+ */
+export const readFileApiV1FilesReadGet = <ThrowOnError extends boolean = false>(
+  options: Options<ReadFileApiV1FilesReadGetData, ThrowOnError>
+) =>
+  (options.client ?? client).get<
+    ReadFileApiV1FilesReadGetResponses,
+    ReadFileApiV1FilesReadGetErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/files/read',
+    ...options,
+  })
+
+/**
+ * Create File Or Directory
+ *
+ * Create a new file or directory.
+ *
+ * Creates a new file with optional initial content, or an empty directory.
+ */
+export const createFileOrDirectoryApiV1FilesCreatePost = <ThrowOnError extends boolean = false>(
+  options: Options<CreateFileOrDirectoryApiV1FilesCreatePostData, ThrowOnError>
+) =>
+  (options.client ?? client).post<
+    CreateFileOrDirectoryApiV1FilesCreatePostResponses,
+    CreateFileOrDirectoryApiV1FilesCreatePostErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/files/create',
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  })
+
+/**
+ * Write File
+ *
+ * Write content to a file.
+ *
+ * Saves content to an existing file or creates a new one.
+ */
+export const writeFileApiV1FilesWritePut = <ThrowOnError extends boolean = false>(
+  options: Options<WriteFileApiV1FilesWritePutData, ThrowOnError>
+) =>
+  (options.client ?? client).put<
+    WriteFileApiV1FilesWritePutResponses,
+    WriteFileApiV1FilesWritePutErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/files/write',
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  })
+
+/**
+ * Upload File
+ *
+ * Upload a file.
+ *
+ * Uploads a file to the specified directory.
+ */
+export const uploadFileApiV1FilesUploadPost = <ThrowOnError extends boolean = false>(
+  options: Options<UploadFileApiV1FilesUploadPostData, ThrowOnError>
+) =>
+  (options.client ?? client).post<
+    UploadFileApiV1FilesUploadPostResponses,
+    UploadFileApiV1FilesUploadPostErrors,
+    ThrowOnError
+  >({
+    ...formDataBodySerializer,
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/files/upload',
+    ...options,
+    headers: {
+      'Content-Type': null,
+      ...options.headers,
+    },
+  })
+
+/**
+ * Download File
+ *
+ * Download a file.
+ *
+ * Returns the file as a downloadable attachment.
+ */
+export const downloadFileApiV1FilesDownloadGet = <ThrowOnError extends boolean = false>(
+  options: Options<DownloadFileApiV1FilesDownloadGetData, ThrowOnError>
+) =>
+  (options.client ?? client).get<
+    DownloadFileApiV1FilesDownloadGetResponses,
+    DownloadFileApiV1FilesDownloadGetErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/files/download',
+    ...options,
+  })
+
+/**
+ * Rename File
+ *
+ * Rename a file or directory.
+ *
+ * Renames the file or directory to a new name (not path).
+ */
+export const renameFileApiV1FilesRenamePut = <ThrowOnError extends boolean = false>(
+  options: Options<RenameFileApiV1FilesRenamePutData, ThrowOnError>
+) =>
+  (options.client ?? client).put<
+    RenameFileApiV1FilesRenamePutResponses,
+    RenameFileApiV1FilesRenamePutErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/files/rename',
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  })
+
+/**
+ * Move File
+ *
+ * Move a file or directory.
+ *
+ * Moves the source to the destination directory.
+ */
+export const moveFileApiV1FilesMovePut = <ThrowOnError extends boolean = false>(
+  options: Options<MoveFileApiV1FilesMovePutData, ThrowOnError>
+) =>
+  (options.client ?? client).put<
+    MoveFileApiV1FilesMovePutResponses,
+    MoveFileApiV1FilesMovePutErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/files/move',
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  })
+
+/**
+ * Copy File
+ *
+ * Copy a file or directory.
+ *
+ * Copies the source to the destination directory.
+ */
+export const copyFileApiV1FilesCopyPut = <ThrowOnError extends boolean = false>(
+  options: Options<CopyFileApiV1FilesCopyPutData, ThrowOnError>
+) =>
+  (options.client ?? client).put<
+    CopyFileApiV1FilesCopyPutResponses,
+    CopyFileApiV1FilesCopyPutErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/files/copy',
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  })
+
+/**
+ * Delete Files
+ *
+ * Delete files or directories.
+ *
+ * Deletes multiple files or directories. Use recursive=true for non-empty directories.
+ */
+export const deleteFilesApiV1FilesDeleteDelete = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteFilesApiV1FilesDeleteDeleteData, ThrowOnError>
+) =>
+  (options.client ?? client).delete<
+    DeleteFilesApiV1FilesDeleteDeleteResponses,
+    DeleteFilesApiV1FilesDeleteDeleteErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/files/delete',
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  })
+
+/**
+ * Get File Info
+ *
+ * Get file or directory information.
+ *
+ * Returns detailed information including permissions, owner, size, and timestamps.
+ */
+export const getFileInfoApiV1FilesInfoGet = <ThrowOnError extends boolean = false>(
+  options: Options<GetFileInfoApiV1FilesInfoGetData, ThrowOnError>
+) =>
+  (options.client ?? client).get<
+    GetFileInfoApiV1FilesInfoGetResponses,
+    GetFileInfoApiV1FilesInfoGetErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/files/info',
+    ...options,
+  })
+
+/**
+ * Change Permission
+ *
+ * Change file or directory permissions.
+ *
+ * Changes permissions using octal mode (e.g., '755', '644').
+ */
+export const changePermissionApiV1FilesPermissionPut = <ThrowOnError extends boolean = false>(
+  options: Options<ChangePermissionApiV1FilesPermissionPutData, ThrowOnError>
+) =>
+  (options.client ?? client).put<
+    ChangePermissionApiV1FilesPermissionPutResponses,
+    ChangePermissionApiV1FilesPermissionPutErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/files/permission',
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  })
+
+/**
+ * Search Files
+ *
+ * Search for files.
+ *
+ * Searches for files matching a pattern (supports wildcards like *, ?).
+ */
+export const searchFilesApiV1FilesSearchPost = <ThrowOnError extends boolean = false>(
+  options: Options<SearchFilesApiV1FilesSearchPostData, ThrowOnError>
+) =>
+  (options.client ?? client).post<
+    SearchFilesApiV1FilesSearchPostResponses,
+    SearchFilesApiV1FilesSearchPostErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/files/search',
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  })
+
+/**
+ * Compress Files
+ *
+ * Compress files into an archive.
+ *
+ * Supports formats: zip, tar, tar.gz, tar.bz2
+ */
+export const compressFilesApiV1FilesCompressPost = <ThrowOnError extends boolean = false>(
+  options: Options<CompressFilesApiV1FilesCompressPostData, ThrowOnError>
+) =>
+  (options.client ?? client).post<
+    CompressFilesApiV1FilesCompressPostResponses,
+    CompressFilesApiV1FilesCompressPostErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/files/compress',
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  })
+
+/**
+ * Decompress Archive
+ *
+ * Decompress an archive.
+ *
+ * Extracts contents of zip, tar, tar.gz, or tar.bz2 archives.
+ */
+export const decompressArchiveApiV1FilesDecompressPost = <ThrowOnError extends boolean = false>(
+  options: Options<DecompressArchiveApiV1FilesDecompressPostData, ThrowOnError>
+) =>
+  (options.client ?? client).post<
+    DecompressArchiveApiV1FilesDecompressPostResponses,
+    DecompressArchiveApiV1FilesDecompressPostErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/files/decompress',
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
   })
 
 /**

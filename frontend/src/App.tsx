@@ -7,6 +7,7 @@ import Nodes from './pages/Nodes'
 import Datasets from './pages/Datasets'
 import Jobs from './pages/Jobs'
 import Users from './pages/Users'
+import Files from './pages/Files'
 import { getToken } from './utils/auth'
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
         <Route path="nodes" element={<Nodes />} />
         <Route path="datasets" element={<Datasets />} />
         <Route path="jobs" element={<Jobs />} />
+        <Route path="files" element={<Files />} />
         <Route path="users" element={<Users />} />
       </Route>
       <Route path="/login" element={<Navigate to="/dashboard" replace />} />

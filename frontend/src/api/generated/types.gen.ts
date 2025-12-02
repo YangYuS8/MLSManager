@@ -35,6 +35,18 @@ export type BodyLoginApiV1AuthLoginPost = {
 }
 
 /**
+ * Body_upload_file_api_v1_files_upload_post
+ */
+export type BodyUploadFileApiV1FilesUploadPost = {
+  /**
+   * File
+   *
+   * File to upload
+   */
+  file: Blob | File
+}
+
+/**
  * DatasetBatchRegister
  *
  * Batch registration request from agent.
@@ -317,6 +329,489 @@ export type DatasetUpdate = {
    * New tags
    */
   tags?: Array<string> | null
+}
+
+/**
+ * FileCompressRequest
+ *
+ * Request for compressing files.
+ */
+export type FileCompressRequest = {
+  /**
+   * Paths
+   *
+   * Paths to compress
+   */
+  paths: Array<string>
+  /**
+   * Destination
+   *
+   * Output archive path
+   */
+  destination: string
+  /**
+   * Format
+   *
+   * Archive format: zip, tar, tar.gz, tar.bz2
+   */
+  format?: string
+}
+
+/**
+ * FileCopyRequest
+ *
+ * Request for copying files or directories.
+ */
+export type FileCopyRequest = {
+  /**
+   * Source
+   *
+   * Source path
+   */
+  source: string
+  /**
+   * Destination
+   *
+   * Destination directory path
+   */
+  destination: string
+  /**
+   * Overwrite
+   *
+   * Overwrite if destination exists
+   */
+  overwrite?: boolean
+}
+
+/**
+ * FileCreateRequest
+ *
+ * Request for creating a file or directory.
+ */
+export type FileCreateRequest = {
+  /**
+   * Path
+   *
+   * Path where to create
+   */
+  path: string
+  /**
+   * Name
+   *
+   * Name of the file or directory
+   */
+  name: string
+  /**
+   * Is Directory
+   *
+   * Create a directory instead of file
+   */
+  is_directory?: boolean
+  /**
+   * Content
+   *
+   * Initial file content (for files only)
+   */
+  content?: string | null
+}
+
+/**
+ * FileDecompressRequest
+ *
+ * Request for decompressing archives.
+ */
+export type FileDecompressRequest = {
+  /**
+   * Path
+   *
+   * Archive file path
+   */
+  path: string
+  /**
+   * Destination
+   *
+   * Destination directory
+   */
+  destination: string
+  /**
+   * Overwrite
+   *
+   * Overwrite existing files
+   */
+  overwrite?: boolean
+}
+
+/**
+ * FileDeleteRequest
+ *
+ * Request for deleting files or directories.
+ */
+export type FileDeleteRequest = {
+  /**
+   * Paths
+   *
+   * List of paths to delete
+   */
+  paths: Array<string>
+  /**
+   * Recursive
+   *
+   * Recursively delete directories
+   */
+  recursive?: boolean
+}
+
+/**
+ * FileInfo
+ *
+ * File or directory information.
+ */
+export type FileInfo = {
+  /**
+   * Name
+   *
+   * File or directory name
+   */
+  name: string
+  /**
+   * Path
+   *
+   * Full path
+   */
+  path: string
+  /**
+   * Type: file, directory, or symlink
+   */
+  type: FileType
+  /**
+   * Size
+   *
+   * File size in bytes
+   */
+  size?: number
+  /**
+   * Mode
+   *
+   * Permission mode (e.g., 'rwxr-xr-x')
+   */
+  mode: string
+  /**
+   * Mode Octal
+   *
+   * Permission mode in octal (e.g., '755')
+   */
+  mode_octal: string
+  /**
+   * Owner
+   *
+   * Owner username
+   */
+  owner: string
+  /**
+   * Group
+   *
+   * Group name
+   */
+  group: string
+  /**
+   * Modified At
+   *
+   * Last modification time
+   */
+  modified_at: string
+  /**
+   * Is Hidden
+   *
+   * Whether the file is hidden
+   */
+  is_hidden?: boolean
+  /**
+   * Extension
+   *
+   * File extension
+   */
+  extension?: string | null
+  /**
+   * Mime Type
+   *
+   * MIME type
+   */
+  mime_type?: string | null
+}
+
+/**
+ * FileListResponse
+ *
+ * Response containing directory listing.
+ */
+export type FileListResponse = {
+  /**
+   * Path
+   *
+   * Current directory path
+   */
+  path: string
+  /**
+   * Parent
+   *
+   * Parent directory path
+   */
+  parent?: string | null
+  /**
+   * Items
+   *
+   * List of files and directories
+   */
+  items?: Array<FileInfo>
+  /**
+   * Total
+   *
+   * Total number of items
+   */
+  total?: number
+}
+
+/**
+ * FileMoveRequest
+ *
+ * Request for moving files or directories.
+ */
+export type FileMoveRequest = {
+  /**
+   * Source
+   *
+   * Source path
+   */
+  source: string
+  /**
+   * Destination
+   *
+   * Destination directory path
+   */
+  destination: string
+  /**
+   * Overwrite
+   *
+   * Overwrite if destination exists
+   */
+  overwrite?: boolean
+}
+
+/**
+ * FileOperationResponse
+ *
+ * Generic response for file operations.
+ */
+export type FileOperationResponse = {
+  /**
+   * Success
+   *
+   * Whether the operation succeeded
+   */
+  success: boolean
+  /**
+   * Message
+   *
+   * Operation result message
+   */
+  message: string
+  /**
+   * Path
+   *
+   * Affected path
+   */
+  path?: string | null
+}
+
+/**
+ * FilePermissionRequest
+ *
+ * Request for changing file permissions.
+ */
+export type FilePermissionRequest = {
+  /**
+   * Path
+   *
+   * File or directory path
+   */
+  path: string
+  /**
+   * Mode
+   *
+   * Permission mode in octal (e.g., '755')
+   */
+  mode: string
+  /**
+   * Recursive
+   *
+   * Apply recursively to directories
+   */
+  recursive?: boolean
+}
+
+/**
+ * FileReadResponse
+ *
+ * Response containing file content.
+ */
+export type FileReadResponse = {
+  /**
+   * Path
+   *
+   * File path
+   */
+  path: string
+  /**
+   * Content
+   *
+   * File content
+   */
+  content: string
+  /**
+   * Size
+   *
+   * File size in bytes
+   */
+  size: number
+  /**
+   * Encoding
+   *
+   * File encoding used
+   */
+  encoding: string
+  /**
+   * Mime Type
+   *
+   * MIME type
+   */
+  mime_type?: string | null
+}
+
+/**
+ * FileRenameRequest
+ *
+ * Request for renaming a file or directory.
+ */
+export type FileRenameRequest = {
+  /**
+   * Path
+   *
+   * Current file/directory path
+   */
+  path: string
+  /**
+   * New Name
+   *
+   * New name (not full path)
+   */
+  new_name: string
+}
+
+/**
+ * FileSearchRequest
+ *
+ * Request for searching files.
+ */
+export type FileSearchRequest = {
+  /**
+   * Path
+   *
+   * Directory to search in
+   */
+  path?: string
+  /**
+   * Pattern
+   *
+   * Search pattern (supports wildcards)
+   */
+  pattern: string
+  /**
+   * Recursive
+   *
+   * Search recursively
+   */
+  recursive?: boolean
+  /**
+   * Include Hidden
+   *
+   * Include hidden files
+   */
+  include_hidden?: boolean
+  /**
+   * Filter by file type
+   */
+  file_type?: FileType | null
+  /**
+   * Max Results
+   *
+   * Maximum number of results
+   */
+  max_results?: number
+}
+
+/**
+ * FileSearchResponse
+ *
+ * Response containing search results.
+ */
+export type FileSearchResponse = {
+  /**
+   * Results
+   *
+   * Matching files
+   */
+  results?: Array<FileInfo>
+  /**
+   * Total
+   *
+   * Total matches found
+   */
+  total?: number
+  /**
+   * Truncated
+   *
+   * Whether results were truncated
+   */
+  truncated?: boolean
+}
+
+/**
+ * FileType
+ *
+ * File type enumeration.
+ */
+export type FileType = 'file' | 'directory' | 'symlink'
+
+/**
+ * FileWriteRequest
+ *
+ * Request for writing file content.
+ */
+export type FileWriteRequest = {
+  /**
+   * Path
+   *
+   * File path to write
+   */
+  path: string
+  /**
+   * Content
+   *
+   * Content to write
+   */
+  content: string
+  /**
+   * Encoding
+   *
+   * File encoding
+   */
+  encoding?: string
+  /**
+   * Create If Not Exists
+   *
+   * Create file if it doesn't exist
+   */
+  create_if_not_exists?: boolean
 }
 
 /**
@@ -2570,6 +3065,479 @@ export type GetJobLogsInfoApiV1JobsJobIdLogsInfoGetResponses = {
 
 export type GetJobLogsInfoApiV1JobsJobIdLogsInfoGetResponse =
   GetJobLogsInfoApiV1JobsJobIdLogsInfoGetResponses[keyof GetJobLogsInfoApiV1JobsJobIdLogsInfoGetResponses]
+
+export type ListDirectoryApiV1FilesListGetData = {
+  body?: never
+  path?: never
+  query?: {
+    /**
+     * Path
+     *
+     * Directory path to list
+     */
+    path?: string
+    /**
+     * Show Hidden
+     *
+     * Include hidden files
+     */
+    show_hidden?: boolean
+    /**
+     * Sort By
+     *
+     * Sort field: name, size, modified_at, type
+     */
+    sort_by?: string
+    /**
+     * Sort Order
+     *
+     * Sort order: asc or desc
+     */
+    sort_order?: string
+  }
+  url: '/api/v1/files/list'
+}
+
+export type ListDirectoryApiV1FilesListGetErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError
+}
+
+export type ListDirectoryApiV1FilesListGetError =
+  ListDirectoryApiV1FilesListGetErrors[keyof ListDirectoryApiV1FilesListGetErrors]
+
+export type ListDirectoryApiV1FilesListGetResponses = {
+  /**
+   * Successful Response
+   */
+  200: FileListResponse
+}
+
+export type ListDirectoryApiV1FilesListGetResponse =
+  ListDirectoryApiV1FilesListGetResponses[keyof ListDirectoryApiV1FilesListGetResponses]
+
+export type ReadFileApiV1FilesReadGetData = {
+  body?: never
+  path?: never
+  query: {
+    /**
+     * Path
+     *
+     * File path to read
+     */
+    path: string
+    /**
+     * Encoding
+     *
+     * File encoding
+     */
+    encoding?: string
+    /**
+     * Max Size
+     *
+     * Maximum file size in bytes
+     */
+    max_size?: number
+  }
+  url: '/api/v1/files/read'
+}
+
+export type ReadFileApiV1FilesReadGetErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError
+}
+
+export type ReadFileApiV1FilesReadGetError =
+  ReadFileApiV1FilesReadGetErrors[keyof ReadFileApiV1FilesReadGetErrors]
+
+export type ReadFileApiV1FilesReadGetResponses = {
+  /**
+   * Successful Response
+   */
+  200: FileReadResponse
+}
+
+export type ReadFileApiV1FilesReadGetResponse =
+  ReadFileApiV1FilesReadGetResponses[keyof ReadFileApiV1FilesReadGetResponses]
+
+export type CreateFileOrDirectoryApiV1FilesCreatePostData = {
+  body: FileCreateRequest
+  path?: never
+  query?: never
+  url: '/api/v1/files/create'
+}
+
+export type CreateFileOrDirectoryApiV1FilesCreatePostErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError
+}
+
+export type CreateFileOrDirectoryApiV1FilesCreatePostError =
+  CreateFileOrDirectoryApiV1FilesCreatePostErrors[keyof CreateFileOrDirectoryApiV1FilesCreatePostErrors]
+
+export type CreateFileOrDirectoryApiV1FilesCreatePostResponses = {
+  /**
+   * Successful Response
+   */
+  200: FileOperationResponse
+}
+
+export type CreateFileOrDirectoryApiV1FilesCreatePostResponse =
+  CreateFileOrDirectoryApiV1FilesCreatePostResponses[keyof CreateFileOrDirectoryApiV1FilesCreatePostResponses]
+
+export type WriteFileApiV1FilesWritePutData = {
+  body: FileWriteRequest
+  path?: never
+  query?: never
+  url: '/api/v1/files/write'
+}
+
+export type WriteFileApiV1FilesWritePutErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError
+}
+
+export type WriteFileApiV1FilesWritePutError =
+  WriteFileApiV1FilesWritePutErrors[keyof WriteFileApiV1FilesWritePutErrors]
+
+export type WriteFileApiV1FilesWritePutResponses = {
+  /**
+   * Successful Response
+   */
+  200: FileOperationResponse
+}
+
+export type WriteFileApiV1FilesWritePutResponse =
+  WriteFileApiV1FilesWritePutResponses[keyof WriteFileApiV1FilesWritePutResponses]
+
+export type UploadFileApiV1FilesUploadPostData = {
+  body: BodyUploadFileApiV1FilesUploadPost
+  path?: never
+  query: {
+    /**
+     * Path
+     *
+     * Directory to upload to
+     */
+    path: string
+    /**
+     * Overwrite
+     *
+     * Overwrite if exists
+     */
+    overwrite?: boolean
+  }
+  url: '/api/v1/files/upload'
+}
+
+export type UploadFileApiV1FilesUploadPostErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError
+}
+
+export type UploadFileApiV1FilesUploadPostError =
+  UploadFileApiV1FilesUploadPostErrors[keyof UploadFileApiV1FilesUploadPostErrors]
+
+export type UploadFileApiV1FilesUploadPostResponses = {
+  /**
+   * Successful Response
+   */
+  200: FileOperationResponse
+}
+
+export type UploadFileApiV1FilesUploadPostResponse =
+  UploadFileApiV1FilesUploadPostResponses[keyof UploadFileApiV1FilesUploadPostResponses]
+
+export type DownloadFileApiV1FilesDownloadGetData = {
+  body?: never
+  path?: never
+  query: {
+    /**
+     * Path
+     *
+     * File path to download
+     */
+    path: string
+  }
+  url: '/api/v1/files/download'
+}
+
+export type DownloadFileApiV1FilesDownloadGetErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError
+}
+
+export type DownloadFileApiV1FilesDownloadGetError =
+  DownloadFileApiV1FilesDownloadGetErrors[keyof DownloadFileApiV1FilesDownloadGetErrors]
+
+export type DownloadFileApiV1FilesDownloadGetResponses = {
+  /**
+   * Successful Response
+   */
+  200: unknown
+}
+
+export type RenameFileApiV1FilesRenamePutData = {
+  body: FileRenameRequest
+  path?: never
+  query?: never
+  url: '/api/v1/files/rename'
+}
+
+export type RenameFileApiV1FilesRenamePutErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError
+}
+
+export type RenameFileApiV1FilesRenamePutError =
+  RenameFileApiV1FilesRenamePutErrors[keyof RenameFileApiV1FilesRenamePutErrors]
+
+export type RenameFileApiV1FilesRenamePutResponses = {
+  /**
+   * Successful Response
+   */
+  200: FileOperationResponse
+}
+
+export type RenameFileApiV1FilesRenamePutResponse =
+  RenameFileApiV1FilesRenamePutResponses[keyof RenameFileApiV1FilesRenamePutResponses]
+
+export type MoveFileApiV1FilesMovePutData = {
+  body: FileMoveRequest
+  path?: never
+  query?: never
+  url: '/api/v1/files/move'
+}
+
+export type MoveFileApiV1FilesMovePutErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError
+}
+
+export type MoveFileApiV1FilesMovePutError =
+  MoveFileApiV1FilesMovePutErrors[keyof MoveFileApiV1FilesMovePutErrors]
+
+export type MoveFileApiV1FilesMovePutResponses = {
+  /**
+   * Successful Response
+   */
+  200: FileOperationResponse
+}
+
+export type MoveFileApiV1FilesMovePutResponse =
+  MoveFileApiV1FilesMovePutResponses[keyof MoveFileApiV1FilesMovePutResponses]
+
+export type CopyFileApiV1FilesCopyPutData = {
+  body: FileCopyRequest
+  path?: never
+  query?: never
+  url: '/api/v1/files/copy'
+}
+
+export type CopyFileApiV1FilesCopyPutErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError
+}
+
+export type CopyFileApiV1FilesCopyPutError =
+  CopyFileApiV1FilesCopyPutErrors[keyof CopyFileApiV1FilesCopyPutErrors]
+
+export type CopyFileApiV1FilesCopyPutResponses = {
+  /**
+   * Successful Response
+   */
+  200: FileOperationResponse
+}
+
+export type CopyFileApiV1FilesCopyPutResponse =
+  CopyFileApiV1FilesCopyPutResponses[keyof CopyFileApiV1FilesCopyPutResponses]
+
+export type DeleteFilesApiV1FilesDeleteDeleteData = {
+  body: FileDeleteRequest
+  path?: never
+  query?: never
+  url: '/api/v1/files/delete'
+}
+
+export type DeleteFilesApiV1FilesDeleteDeleteErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError
+}
+
+export type DeleteFilesApiV1FilesDeleteDeleteError =
+  DeleteFilesApiV1FilesDeleteDeleteErrors[keyof DeleteFilesApiV1FilesDeleteDeleteErrors]
+
+export type DeleteFilesApiV1FilesDeleteDeleteResponses = {
+  /**
+   * Successful Response
+   */
+  200: FileOperationResponse
+}
+
+export type DeleteFilesApiV1FilesDeleteDeleteResponse =
+  DeleteFilesApiV1FilesDeleteDeleteResponses[keyof DeleteFilesApiV1FilesDeleteDeleteResponses]
+
+export type GetFileInfoApiV1FilesInfoGetData = {
+  body?: never
+  path?: never
+  query: {
+    /**
+     * Path
+     *
+     * File or directory path
+     */
+    path: string
+  }
+  url: '/api/v1/files/info'
+}
+
+export type GetFileInfoApiV1FilesInfoGetErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError
+}
+
+export type GetFileInfoApiV1FilesInfoGetError =
+  GetFileInfoApiV1FilesInfoGetErrors[keyof GetFileInfoApiV1FilesInfoGetErrors]
+
+export type GetFileInfoApiV1FilesInfoGetResponses = {
+  /**
+   * Successful Response
+   */
+  200: FileInfo
+}
+
+export type GetFileInfoApiV1FilesInfoGetResponse =
+  GetFileInfoApiV1FilesInfoGetResponses[keyof GetFileInfoApiV1FilesInfoGetResponses]
+
+export type ChangePermissionApiV1FilesPermissionPutData = {
+  body: FilePermissionRequest
+  path?: never
+  query?: never
+  url: '/api/v1/files/permission'
+}
+
+export type ChangePermissionApiV1FilesPermissionPutErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError
+}
+
+export type ChangePermissionApiV1FilesPermissionPutError =
+  ChangePermissionApiV1FilesPermissionPutErrors[keyof ChangePermissionApiV1FilesPermissionPutErrors]
+
+export type ChangePermissionApiV1FilesPermissionPutResponses = {
+  /**
+   * Successful Response
+   */
+  200: FileOperationResponse
+}
+
+export type ChangePermissionApiV1FilesPermissionPutResponse =
+  ChangePermissionApiV1FilesPermissionPutResponses[keyof ChangePermissionApiV1FilesPermissionPutResponses]
+
+export type SearchFilesApiV1FilesSearchPostData = {
+  body: FileSearchRequest
+  path?: never
+  query?: never
+  url: '/api/v1/files/search'
+}
+
+export type SearchFilesApiV1FilesSearchPostErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError
+}
+
+export type SearchFilesApiV1FilesSearchPostError =
+  SearchFilesApiV1FilesSearchPostErrors[keyof SearchFilesApiV1FilesSearchPostErrors]
+
+export type SearchFilesApiV1FilesSearchPostResponses = {
+  /**
+   * Successful Response
+   */
+  200: FileSearchResponse
+}
+
+export type SearchFilesApiV1FilesSearchPostResponse =
+  SearchFilesApiV1FilesSearchPostResponses[keyof SearchFilesApiV1FilesSearchPostResponses]
+
+export type CompressFilesApiV1FilesCompressPostData = {
+  body: FileCompressRequest
+  path?: never
+  query?: never
+  url: '/api/v1/files/compress'
+}
+
+export type CompressFilesApiV1FilesCompressPostErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError
+}
+
+export type CompressFilesApiV1FilesCompressPostError =
+  CompressFilesApiV1FilesCompressPostErrors[keyof CompressFilesApiV1FilesCompressPostErrors]
+
+export type CompressFilesApiV1FilesCompressPostResponses = {
+  /**
+   * Successful Response
+   */
+  200: FileOperationResponse
+}
+
+export type CompressFilesApiV1FilesCompressPostResponse =
+  CompressFilesApiV1FilesCompressPostResponses[keyof CompressFilesApiV1FilesCompressPostResponses]
+
+export type DecompressArchiveApiV1FilesDecompressPostData = {
+  body: FileDecompressRequest
+  path?: never
+  query?: never
+  url: '/api/v1/files/decompress'
+}
+
+export type DecompressArchiveApiV1FilesDecompressPostErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError
+}
+
+export type DecompressArchiveApiV1FilesDecompressPostError =
+  DecompressArchiveApiV1FilesDecompressPostErrors[keyof DecompressArchiveApiV1FilesDecompressPostErrors]
+
+export type DecompressArchiveApiV1FilesDecompressPostResponses = {
+  /**
+   * Successful Response
+   */
+  200: FileOperationResponse
+}
+
+export type DecompressArchiveApiV1FilesDecompressPostResponse =
+  DecompressArchiveApiV1FilesDecompressPostResponses[keyof DecompressArchiveApiV1FilesDecompressPostResponses]
 
 export type HealthCheckHealthGetData = {
   body?: never

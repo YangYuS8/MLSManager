@@ -1,5 +1,7 @@
 # Change: Add Swagger Documentation and OpenAPI TypeScript Codegen
 
+## Status: ✅ 已完成
+
 ## Why
 1. Backend API endpoints lack detailed descriptions, making it harder for frontend developers to understand the API
 2. Frontend currently uses manual axios calls; auto-generated typed API client from OpenAPI spec would improve type safety and reduce maintenance burden

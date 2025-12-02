@@ -1,5 +1,7 @@
 # Change: Add Development Environment with Makefile
 
+## Status: ✅ 已完成
+
 ## Why
 简化开发和部署流程，提供统一的命令入口：
 - 开发者需要一键启动开发环境

@@ -1,5 +1,7 @@
 # Change: Add Default Admin User Seeding
 
+## Status: ✅ 已完成
+
 ## Why
 开发环境首次启动时数据库为空，无法登录系统。需要在应用启动时自动创建默认管理员账户，方便开发和测试。
 

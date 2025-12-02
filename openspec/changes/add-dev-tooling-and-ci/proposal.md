@@ -1,5 +1,7 @@
 # Change: Add Development Tooling and CI Workflows
 
+## Status: ✅ 已完成
+
 ## Why
 The project needs standardized development tooling and automated code quality checks to ensure consistent code style, catch issues early, and maintain high code quality across the team.
 
