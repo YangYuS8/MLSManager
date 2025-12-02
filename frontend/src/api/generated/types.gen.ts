@@ -10,6 +10,38 @@ export type Body_login_api_v1_auth_login_post = {
 }
 
 /**
+ * Batch registration request from agent.
+ */
+export type DatasetBatchRegister = {
+  /**
+   * List of scanned datasets to register
+   */
+  datasets: Array<DatasetScanItem>
+}
+
+/**
+ * Result of batch registration.
+ */
+export type DatasetBatchResult = {
+  /**
+   * Number of newly registered datasets
+   */
+  registered: number
+  /**
+   * Number of updated datasets
+   */
+  updated: number
+  /**
+   * Number of failed registrations
+   */
+  failed: number
+  /**
+   * Error messages
+   */
+  errors?: Array<string>
+}
+
+/**
  * Schema for creating a new dataset entry.
  */
 export type DatasetCreate = {
@@ -99,6 +131,36 @@ export type DatasetRead = {
    * Last update timestamp
    */
   updated_at: string
+}
+
+/**
+ * Single dataset item from agent scan.
+ */
+export type DatasetScanItem = {
+  /**
+   * Dataset name (usually directory name)
+   */
+  name: string
+  /**
+   * Absolute path on node
+   */
+  local_path: string
+  /**
+   * Total size in bytes
+   */
+  size_bytes?: number | null
+  /**
+   * Number of files
+   */
+  file_count?: number | null
+  /**
+   * Detected format
+   */
+  format?: string | null
+  /**
+   * Auto-generated description
+   */
+  description?: string | null
 }
 
 /**
@@ -201,6 +263,42 @@ export type JobCreate = {
 }
 
 /**
+ * Schema for reading job logs.
+ */
+export type JobLogRead = {
+  /**
+   * Job ID
+   */
+  job_id: number
+  /**
+   * Log content
+   */
+  content: string
+  /**
+   * Log size in bytes
+   */
+  size_bytes: number
+  /**
+   * Last update time
+   */
+  last_updated?: string | null
+}
+
+/**
+ * Schema for uploading job logs from worker agent.
+ */
+export type JobLogUpload = {
+  /**
+   * Log content (text)
+   */
+  content: string
+  /**
+   * Append to existing log (True) or overwrite (False)
+   */
+  append?: boolean
+}
+
+/**
  * Schema for reading job data.
  */
 export type JobRead = {
@@ -295,9 +393,69 @@ export type JobRead = {
 }
 
 /**
+ * Aggregated job statistics.
+ */
+export type JobStats = {
+  /**
+   * Total number of jobs
+   */
+  total_jobs: number
+  /**
+   * Jobs waiting for assignment
+   */
+  pending_jobs: number
+  /**
+   * Jobs assigned but not started
+   */
+  queued_jobs: number
+  /**
+   * Currently running jobs
+   */
+  running_jobs: number
+  /**
+   * Successfully completed jobs
+   */
+  completed_jobs: number
+  /**
+   * Failed jobs
+   */
+  failed_jobs: number
+  /**
+   * Cancelled jobs
+   */
+  cancelled_jobs: number
+}
+
+/**
  * Job status enumeration.
  */
 export type JobStatus = 'pending' | 'queued' | 'running' | 'completed' | 'failed' | 'cancelled'
+
+/**
+ * Schema for worker agent to update job status.
+ */
+export type JobStatusUpdate = {
+  /**
+   * New job status
+   */
+  status: JobStatus
+  /**
+   * Process exit code (for completed/failed)
+   */
+  exit_code?: number | null
+  /**
+   * Error message if failed
+   */
+  error_message?: string | null
+  /**
+   * Path to job logs on node
+   */
+  log_path?: string | null
+  /**
+   * Path to job outputs on node
+   */
+  output_path?: string | null
+}
 
 /**
  * Job execution environment type.
@@ -466,6 +624,109 @@ export type NodeRead = {
    * Last update timestamp
    */
   updated_at: string
+}
+
+/**
+ * Schema for worker node self-registration.
+ */
+export type NodeRegister = {
+  /**
+   * Unique node identifier
+   */
+  node_id: string
+  /**
+   * Human-readable node name
+   */
+  name: string
+  /**
+   * Node hostname or IP (as seen by master)
+   */
+  host: string
+  /**
+   * Node API port
+   */
+  port?: number
+  /**
+   * Base path for data storage
+   */
+  storage_path?: string | null
+  /**
+   * Number of CPU cores
+   */
+  cpu_count?: number | null
+  /**
+   * Total memory in GB
+   */
+  memory_total_gb?: number | null
+  /**
+   * Number of GPUs
+   */
+  gpu_count?: number | null
+  /**
+   * GPU information
+   */
+  gpu_info?: string | null
+  /**
+   * Total storage in GB
+   */
+  storage_total_gb?: number | null
+  /**
+   * Used storage in GB
+   */
+  storage_used_gb?: number | null
+}
+
+/**
+ * Response for node registration.
+ */
+export type NodeRegisterResponse = {
+  /**
+   * Registered node information
+   */
+  node: NodeRead
+  /**
+   * Agent authentication token
+   */
+  token: string
+  message?: string
+}
+
+/**
+ * Aggregated node statistics.
+ */
+export type NodeStats = {
+  /**
+   * Total number of nodes
+   */
+  total_nodes: number
+  /**
+   * Number of online nodes
+   */
+  online_nodes: number
+  /**
+   * Number of offline nodes
+   */
+  offline_nodes: number
+  /**
+   * Total CPU cores across all nodes
+   */
+  total_cpu: number
+  /**
+   * Total memory in GB
+   */
+  total_memory_gb: number
+  /**
+   * Total GPUs
+   */
+  total_gpu: number
+  /**
+   * Total storage in GB
+   */
+  total_storage_gb: number
+  /**
+   * Used storage in GB
+   */
+  used_storage_gb: number
 }
 
 /**
@@ -671,6 +932,18 @@ export type UpdateUserApiV1UsersUserIdPatchResponse = UserRead
 
 export type UpdateUserApiV1UsersUserIdPatchError = unknown | HTTPValidationError
 
+export type RegisterWorkerNodeApiV1NodesRegisterPostData = {
+  body: NodeRegister
+}
+
+export type RegisterWorkerNodeApiV1NodesRegisterPostResponse = NodeRegisterResponse
+
+export type RegisterWorkerNodeApiV1NodesRegisterPostError = HTTPValidationError
+
+export type GetNodeStatsApiV1NodesStatsGetResponse = NodeStats
+
+export type GetNodeStatsApiV1NodesStatsGetError = unknown
+
 export type ListNodesApiV1NodesGetData = {
   query?: {
     limit?: number
@@ -792,6 +1065,87 @@ export type DeleteDatasetApiV1DatasetsDatasetIdDeleteResponse = void
 
 export type DeleteDatasetApiV1DatasetsDatasetIdDeleteError = unknown | HTTPValidationError
 
+export type BatchRegisterDatasetsApiV1DatasetsBatchPostData = {
+  body: DatasetBatchRegister
+  headers?: {
+    'X-Agent-Token'?: string | null
+  }
+}
+
+export type BatchRegisterDatasetsApiV1DatasetsBatchPostResponse = DatasetBatchResult
+
+export type BatchRegisterDatasetsApiV1DatasetsBatchPostError = unknown | HTTPValidationError
+
+export type ListNodeDatasetsApiV1DatasetsNodeNodeIdGetData = {
+  path: {
+    node_id: number
+  }
+  query?: {
+    limit?: number
+    skip?: number
+  }
+}
+
+export type ListNodeDatasetsApiV1DatasetsNodeNodeIdGetResponse = Array<DatasetRead>
+
+export type ListNodeDatasetsApiV1DatasetsNodeNodeIdGetError = HTTPValidationError
+
+export type SearchDatasetsApiV1DatasetsSearchGetData = {
+  query: {
+    /**
+     * Filter by format
+     */
+    format?: string | null
+    limit?: number
+    /**
+     * Search query
+     */
+    q: string
+    skip?: number
+  }
+}
+
+export type SearchDatasetsApiV1DatasetsSearchGetResponse = Array<DatasetRead>
+
+export type SearchDatasetsApiV1DatasetsSearchGetError = HTTPValidationError
+
+export type GetJobStatsApiV1JobsStatsGetResponse = JobStats
+
+export type GetJobStatsApiV1JobsStatsGetError = unknown
+
+export type GetJobQueueApiV1JobsQueueNodeIdGetData = {
+  path: {
+    node_id: string
+  }
+  query?: {
+    /**
+     * Maximum jobs to return
+     */
+    limit?: number
+  }
+}
+
+export type GetJobQueueApiV1JobsQueueNodeIdGetResponse = Array<JobRead>
+
+export type GetJobQueueApiV1JobsQueueNodeIdGetError = HTTPValidationError
+
+export type UpdateJobStatusApiV1JobsJobIdStatusPostData = {
+  body: JobStatusUpdate
+  path: {
+    job_id: number
+  }
+}
+
+export type UpdateJobStatusApiV1JobsJobIdStatusPostResponse = JobRead
+
+export type UpdateJobStatusApiV1JobsJobIdStatusPostError = HTTPValidationError
+
+export type AutoAssignJobsApiV1JobsAutoAssignPostResponse = {
+  [key: string]: unknown
+}
+
+export type AutoAssignJobsApiV1JobsAutoAssignPostError = unknown
+
 export type ListJobsApiV1JobsGetData = {
   query?: {
     /**
@@ -865,6 +1219,48 @@ export type CancelJobApiV1JobsJobIdCancelPostData = {
 export type CancelJobApiV1JobsJobIdCancelPostResponse = JobRead
 
 export type CancelJobApiV1JobsJobIdCancelPostError = unknown | HTTPValidationError
+
+export type UploadJobLogsApiV1JobsJobIdLogsPostData = {
+  body: JobLogUpload
+  headers?: {
+    'X-Agent-Token'?: string | null
+  }
+  path: {
+    job_id: number
+  }
+}
+
+export type UploadJobLogsApiV1JobsJobIdLogsPostResponse = {
+  [key: string]: unknown
+}
+
+export type UploadJobLogsApiV1JobsJobIdLogsPostError = unknown | HTTPValidationError
+
+export type GetJobLogsApiV1JobsJobIdLogsGetData = {
+  path: {
+    job_id: number
+  }
+  query?: {
+    /**
+     * Return only last N lines
+     */
+    tail?: number | null
+  }
+}
+
+export type GetJobLogsApiV1JobsJobIdLogsGetResponse = string
+
+export type GetJobLogsApiV1JobsJobIdLogsGetError = unknown | HTTPValidationError
+
+export type GetJobLogsInfoApiV1JobsJobIdLogsInfoGetData = {
+  path: {
+    job_id: number
+  }
+}
+
+export type GetJobLogsInfoApiV1JobsJobIdLogsInfoGetResponse = JobLogRead
+
+export type GetJobLogsInfoApiV1JobsJobIdLogsInfoGetError = HTTPValidationError
 
 export type HealthCheckHealthGetResponse = unknown
 

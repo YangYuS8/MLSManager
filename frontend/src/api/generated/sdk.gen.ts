@@ -24,6 +24,11 @@ import type {
   UpdateUserApiV1UsersUserIdPatchData,
   UpdateUserApiV1UsersUserIdPatchError,
   UpdateUserApiV1UsersUserIdPatchResponse,
+  RegisterWorkerNodeApiV1NodesRegisterPostData,
+  RegisterWorkerNodeApiV1NodesRegisterPostError,
+  RegisterWorkerNodeApiV1NodesRegisterPostResponse,
+  GetNodeStatsApiV1NodesStatsGetError,
+  GetNodeStatsApiV1NodesStatsGetResponse,
   ListNodesApiV1NodesGetData,
   ListNodesApiV1NodesGetError,
   ListNodesApiV1NodesGetResponse,
@@ -57,6 +62,25 @@ import type {
   DeleteDatasetApiV1DatasetsDatasetIdDeleteData,
   DeleteDatasetApiV1DatasetsDatasetIdDeleteError,
   DeleteDatasetApiV1DatasetsDatasetIdDeleteResponse,
+  BatchRegisterDatasetsApiV1DatasetsBatchPostData,
+  BatchRegisterDatasetsApiV1DatasetsBatchPostError,
+  BatchRegisterDatasetsApiV1DatasetsBatchPostResponse,
+  ListNodeDatasetsApiV1DatasetsNodeNodeIdGetData,
+  ListNodeDatasetsApiV1DatasetsNodeNodeIdGetError,
+  ListNodeDatasetsApiV1DatasetsNodeNodeIdGetResponse,
+  SearchDatasetsApiV1DatasetsSearchGetData,
+  SearchDatasetsApiV1DatasetsSearchGetError,
+  SearchDatasetsApiV1DatasetsSearchGetResponse,
+  GetJobStatsApiV1JobsStatsGetError,
+  GetJobStatsApiV1JobsStatsGetResponse,
+  GetJobQueueApiV1JobsQueueNodeIdGetData,
+  GetJobQueueApiV1JobsQueueNodeIdGetError,
+  GetJobQueueApiV1JobsQueueNodeIdGetResponse,
+  UpdateJobStatusApiV1JobsJobIdStatusPostData,
+  UpdateJobStatusApiV1JobsJobIdStatusPostError,
+  UpdateJobStatusApiV1JobsJobIdStatusPostResponse,
+  AutoAssignJobsApiV1JobsAutoAssignPostError,
+  AutoAssignJobsApiV1JobsAutoAssignPostResponse,
   ListJobsApiV1JobsGetData,
   ListJobsApiV1JobsGetError,
   ListJobsApiV1JobsGetResponse,
@@ -75,6 +99,15 @@ import type {
   CancelJobApiV1JobsJobIdCancelPostData,
   CancelJobApiV1JobsJobIdCancelPostError,
   CancelJobApiV1JobsJobIdCancelPostResponse,
+  UploadJobLogsApiV1JobsJobIdLogsPostData,
+  UploadJobLogsApiV1JobsJobIdLogsPostError,
+  UploadJobLogsApiV1JobsJobIdLogsPostResponse,
+  GetJobLogsApiV1JobsJobIdLogsGetData,
+  GetJobLogsApiV1JobsJobIdLogsGetError,
+  GetJobLogsApiV1JobsJobIdLogsGetResponse,
+  GetJobLogsInfoApiV1JobsJobIdLogsInfoGetData,
+  GetJobLogsInfoApiV1JobsJobIdLogsInfoGetError,
+  GetJobLogsInfoApiV1JobsJobIdLogsInfoGetResponse,
   HealthCheckHealthGetError,
   HealthCheckHealthGetResponse,
 } from './types.gen'
@@ -185,6 +218,40 @@ export const updateUserApiV1UsersUserIdPatch = <ThrowOnError extends boolean = f
   >({
     ...options,
     url: '/api/v1/users/{user_id}',
+  })
+}
+
+/**
+ * Register worker node (self-registration)
+ * Called by worker agent to register itself with the master node.
+ */
+export const registerWorkerNodeApiV1NodesRegisterPost = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<RegisterWorkerNodeApiV1NodesRegisterPostData, ThrowOnError>
+) => {
+  return (options?.client ?? client).post<
+    RegisterWorkerNodeApiV1NodesRegisterPostResponse,
+    RegisterWorkerNodeApiV1NodesRegisterPostError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/api/v1/nodes/register',
+  })
+}
+
+/**
+ * Get node statistics
+ * Get aggregated statistics for all nodes.
+ */
+export const getNodeStatsApiV1NodesStatsGet = <ThrowOnError extends boolean = false>(
+  options?: OptionsLegacyParser<unknown, ThrowOnError>
+) => {
+  return (options?.client ?? client).get<
+    GetNodeStatsApiV1NodesStatsGetResponse,
+    GetNodeStatsApiV1NodesStatsGetError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/api/v1/nodes/stats',
   })
 }
 
@@ -376,6 +443,125 @@ export const deleteDatasetApiV1DatasetsDatasetIdDelete = <ThrowOnError extends b
 }
 
 /**
+ * Batch register datasets from agent
+ * Worker agent reports scanned datasets. Creates new or updates existing.
+ */
+export const batchRegisterDatasetsApiV1DatasetsBatchPost = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<BatchRegisterDatasetsApiV1DatasetsBatchPostData, ThrowOnError>
+) => {
+  return (options?.client ?? client).post<
+    BatchRegisterDatasetsApiV1DatasetsBatchPostResponse,
+    BatchRegisterDatasetsApiV1DatasetsBatchPostError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/api/v1/datasets/batch',
+  })
+}
+
+/**
+ * Get datasets by node
+ * List all datasets on a specific node.
+ */
+export const listNodeDatasetsApiV1DatasetsNodeNodeIdGet = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<ListNodeDatasetsApiV1DatasetsNodeNodeIdGetData, ThrowOnError>
+) => {
+  return (options?.client ?? client).get<
+    ListNodeDatasetsApiV1DatasetsNodeNodeIdGetResponse,
+    ListNodeDatasetsApiV1DatasetsNodeNodeIdGetError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/api/v1/datasets/node/{node_id}',
+  })
+}
+
+/**
+ * Search datasets
+ * Search datasets by name, format, or tags.
+ */
+export const searchDatasetsApiV1DatasetsSearchGet = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<SearchDatasetsApiV1DatasetsSearchGetData, ThrowOnError>
+) => {
+  return (options?.client ?? client).get<
+    SearchDatasetsApiV1DatasetsSearchGetResponse,
+    SearchDatasetsApiV1DatasetsSearchGetError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/api/v1/datasets/search',
+  })
+}
+
+/**
+ * Get job statistics
+ * Get aggregated job statistics.
+ */
+export const getJobStatsApiV1JobsStatsGet = <ThrowOnError extends boolean = false>(
+  options?: OptionsLegacyParser<unknown, ThrowOnError>
+) => {
+  return (options?.client ?? client).get<
+    GetJobStatsApiV1JobsStatsGetResponse,
+    GetJobStatsApiV1JobsStatsGetError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/api/v1/jobs/stats',
+  })
+}
+
+/**
+ * Get queued jobs for node
+ * Get jobs queued for execution on a specific node. Used by worker agents.
+ */
+export const getJobQueueApiV1JobsQueueNodeIdGet = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<GetJobQueueApiV1JobsQueueNodeIdGetData, ThrowOnError>
+) => {
+  return (options?.client ?? client).get<
+    GetJobQueueApiV1JobsQueueNodeIdGetResponse,
+    GetJobQueueApiV1JobsQueueNodeIdGetError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/api/v1/jobs/queue/{node_id}',
+  })
+}
+
+/**
+ * Update job status
+ * Update job status and execution info. Used by worker agents.
+ */
+export const updateJobStatusApiV1JobsJobIdStatusPost = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<UpdateJobStatusApiV1JobsJobIdStatusPostData, ThrowOnError>
+) => {
+  return (options?.client ?? client).post<
+    UpdateJobStatusApiV1JobsJobIdStatusPostResponse,
+    UpdateJobStatusApiV1JobsJobIdStatusPostError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/api/v1/jobs/{job_id}/status',
+  })
+}
+
+/**
+ * Auto-assign pending jobs
+ * Automatically assign all pending jobs to available nodes. **Admin only.**
+ */
+export const autoAssignJobsApiV1JobsAutoAssignPost = <ThrowOnError extends boolean = false>(
+  options?: OptionsLegacyParser<unknown, ThrowOnError>
+) => {
+  return (options?.client ?? client).post<
+    AutoAssignJobsApiV1JobsAutoAssignPostResponse,
+    AutoAssignJobsApiV1JobsAutoAssignPostError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/api/v1/jobs/auto-assign',
+  })
+}
+
+/**
  * List all jobs
  * Retrieve a paginated list of jobs with optional filtering.
  */
@@ -474,6 +660,57 @@ export const cancelJobApiV1JobsJobIdCancelPost = <ThrowOnError extends boolean =
   >({
     ...options,
     url: '/api/v1/jobs/{job_id}/cancel',
+  })
+}
+
+/**
+ * Upload job logs
+ * Worker agent uploads job execution logs.
+ */
+export const uploadJobLogsApiV1JobsJobIdLogsPost = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<UploadJobLogsApiV1JobsJobIdLogsPostData, ThrowOnError>
+) => {
+  return (options?.client ?? client).post<
+    UploadJobLogsApiV1JobsJobIdLogsPostResponse,
+    UploadJobLogsApiV1JobsJobIdLogsPostError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/api/v1/jobs/{job_id}/logs',
+  })
+}
+
+/**
+ * Get job logs
+ * Retrieve job execution logs.
+ */
+export const getJobLogsApiV1JobsJobIdLogsGet = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<GetJobLogsApiV1JobsJobIdLogsGetData, ThrowOnError>
+) => {
+  return (options?.client ?? client).get<
+    GetJobLogsApiV1JobsJobIdLogsGetResponse,
+    GetJobLogsApiV1JobsJobIdLogsGetError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/api/v1/jobs/{job_id}/logs',
+  })
+}
+
+/**
+ * Get job logs info
+ * Get metadata about job logs without fetching content.
+ */
+export const getJobLogsInfoApiV1JobsJobIdLogsInfoGet = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<GetJobLogsInfoApiV1JobsJobIdLogsInfoGetData, ThrowOnError>
+) => {
+  return (options?.client ?? client).get<
+    GetJobLogsInfoApiV1JobsJobIdLogsInfoGetResponse,
+    GetJobLogsInfoApiV1JobsJobIdLogsInfoGetError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/api/v1/jobs/{job_id}/logs/info',
   })
 }
 
