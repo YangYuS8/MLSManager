@@ -7,7 +7,15 @@ import {
   PlayCircleOutlined,
   CheckCircleOutlined,
 } from '@ant-design/icons'
-import api from '../utils/api'
+import { useTranslation } from 'react-i18next'
+import {
+  listNodesApiV1NodesGet,
+  listDatasetsApiV1DatasetsGet,
+  listJobsApiV1JobsGet,
+  type NodeRead,
+  type DatasetRead,
+  type JobRead,
+} from '../api/client'
 
 interface Stats {
   totalNodes: number
@@ -20,6 +28,7 @@ interface Stats {
 
 const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true)
+  const { t } = useTranslation()
   const [stats, setStats] = useState<Stats>({
     totalNodes: 0,
     onlineNodes: 0,
@@ -33,25 +42,25 @@ const Dashboard: React.FC = () => {
     const fetchStats = async () => {
       try {
         const [nodesRes, datasetsRes, jobsRes] = await Promise.all([
-          api.get('/nodes/'),
-          api.get('/datasets/'),
-          api.get('/jobs/'),
+          listNodesApiV1NodesGet(),
+          listDatasetsApiV1DatasetsGet(),
+          listJobsApiV1JobsGet(),
         ])
 
-        const nodes = nodesRes.data
-        const datasets = datasetsRes.data
-        const jobs = jobsRes.data
+        const nodes: NodeRead[] = nodesRes.data || []
+        const datasets: DatasetRead[] = datasetsRes.data || []
+        const jobs: JobRead[] = jobsRes.data || []
 
         setStats({
           totalNodes: nodes.length,
-          onlineNodes: nodes.filter((n: any) => n.status === 'online').length,
+          onlineNodes: nodes.filter((n) => n.status === 'online').length,
           totalDatasets: datasets.length,
           totalJobs: jobs.length,
-          runningJobs: jobs.filter((j: any) => j.status === 'running').length,
-          completedJobs: jobs.filter((j: any) => j.status === 'completed').length,
+          runningJobs: jobs.filter((j) => j.status === 'running').length,
+          completedJobs: jobs.filter((j) => j.status === 'completed').length,
         })
       } catch (error) {
-        // Error handled by interceptor
+        console.error('Failed to fetch stats:', error)
       } finally {
         setLoading(false)
       }
@@ -70,24 +79,28 @@ const Dashboard: React.FC = () => {
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold mb-6">Dashboard</h2>
+      <h2 className="text-2xl font-semibold mb-6">{t('dashboard.title')}</h2>
 
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12} lg={6}>
           <StatisticCard
             statistic={{
-              title: 'Total Nodes',
+              title: t('dashboard.totalNodes'),
               value: stats.totalNodes,
               icon: <CloudServerOutlined className="text-blue-500" />,
             }}
-            chart={<div className="text-sm text-gray-500">{stats.onlineNodes} online</div>}
+            chart={
+              <div className="text-sm text-gray-500">
+                {stats.onlineNodes} {t('nodes.online').toLowerCase()}
+              </div>
+            }
           />
         </Col>
 
         <Col xs={24} sm={12} lg={6}>
           <StatisticCard
             statistic={{
-              title: 'Total Datasets',
+              title: t('dashboard.totalDatasets'),
               value: stats.totalDatasets,
               icon: <DatabaseOutlined className="text-green-500" />,
             }}
@@ -97,18 +110,22 @@ const Dashboard: React.FC = () => {
         <Col xs={24} sm={12} lg={6}>
           <StatisticCard
             statistic={{
-              title: 'Total Jobs',
+              title: t('dashboard.totalJobs'),
               value: stats.totalJobs,
               icon: <PlayCircleOutlined className="text-orange-500" />,
             }}
-            chart={<div className="text-sm text-gray-500">{stats.runningJobs} running</div>}
+            chart={
+              <div className="text-sm text-gray-500">
+                {stats.runningJobs} {t('dashboard.runningJobs').toLowerCase()}
+              </div>
+            }
           />
         </Col>
 
         <Col xs={24} sm={12} lg={6}>
           <StatisticCard
             statistic={{
-              title: 'Completed Jobs',
+              title: t('jobs.status.completed'),
               value: stats.completedJobs,
               icon: <CheckCircleOutlined className="text-emerald-500" />,
             }}
@@ -118,18 +135,19 @@ const Dashboard: React.FC = () => {
 
       <Row gutter={[16, 16]} className="mt-6">
         <Col span={24}>
-          <Card title="Quick Start Guide">
+          <Card title={t('dashboard.quickStats')}>
             <ul className="list-disc list-inside space-y-2">
               <li>
-                Register worker nodes in the <strong>Nodes</strong> section
+                {t('nav.nodes')}: <strong>{stats.totalNodes}</strong> ({stats.onlineNodes}{' '}
+                {t('nodes.online').toLowerCase()})
               </li>
               <li>
-                Add datasets to your nodes in the <strong>Datasets</strong> section
+                {t('nav.datasets')}: <strong>{stats.totalDatasets}</strong>
               </li>
               <li>
-                Submit ML training jobs in the <strong>Jobs</strong> section
+                {t('nav.jobs')}: <strong>{stats.totalJobs}</strong> ({stats.runningJobs}{' '}
+                {t('dashboard.runningJobs').toLowerCase()})
               </li>
-              <li>Monitor job status and view logs in real-time</li>
             </ul>
           </Card>
         </Col>

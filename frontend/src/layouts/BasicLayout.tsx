@@ -8,45 +8,48 @@ import {
   LogoutOutlined,
 } from '@ant-design/icons'
 import { ProLayout, ProLayoutProps } from '@ant-design/pro-components'
-import { Dropdown, Avatar } from 'antd'
+import { Dropdown } from 'antd'
+import { useTranslation } from 'react-i18next'
 import { removeToken, getUsername } from '../utils/auth'
+import { LanguageSwitcher } from '../components/LanguageSwitcher'
 
 interface BasicLayoutProps {
   onLogout: () => void
 }
 
-const menuItems = [
-  {
-    path: '/dashboard',
-    name: 'Dashboard',
-    icon: <DashboardOutlined />,
-  },
-  {
-    path: '/nodes',
-    name: 'Nodes',
-    icon: <CloudServerOutlined />,
-  },
-  {
-    path: '/datasets',
-    name: 'Datasets',
-    icon: <DatabaseOutlined />,
-  },
-  {
-    path: '/jobs',
-    name: 'Jobs',
-    icon: <PlayCircleOutlined />,
-  },
-  {
-    path: '/users',
-    name: 'Users',
-    icon: <UserOutlined />,
-  },
-]
-
 const BasicLayout: React.FC<BasicLayoutProps> = ({ onLogout }) => {
   const navigate = useNavigate()
   const location = useLocation()
   const username = getUsername()
+  const { t } = useTranslation()
+
+  const menuItems = [
+    {
+      path: '/dashboard',
+      name: t('nav.dashboard'),
+      icon: <DashboardOutlined />,
+    },
+    {
+      path: '/nodes',
+      name: t('nav.nodes'),
+      icon: <CloudServerOutlined />,
+    },
+    {
+      path: '/datasets',
+      name: t('nav.datasets'),
+      icon: <DatabaseOutlined />,
+    },
+    {
+      path: '/jobs',
+      name: t('nav.jobs'),
+      icon: <PlayCircleOutlined />,
+    },
+    {
+      path: '/users',
+      name: t('nav.users'),
+      icon: <UserOutlined />,
+    },
+  ]
 
   const handleLogout = () => {
     removeToken()
@@ -68,6 +71,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = ({ onLogout }) => {
       pathname: location.pathname,
     },
     menuItemRender: (item, dom) => <div onClick={() => navigate(item.path || '/')}>{dom}</div>,
+    actionsRender: () => [<LanguageSwitcher key="lang" />],
     avatarProps: {
       src: undefined,
       title: username || 'User',
@@ -78,7 +82,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = ({ onLogout }) => {
               {
                 key: 'logout',
                 icon: <LogoutOutlined />,
-                label: 'Logout',
+                label: t('auth.logout'),
                 onClick: handleLogout,
               },
             ],

@@ -2,8 +2,10 @@ import { useState } from 'react'
 import { LoginForm, ProFormText } from '@ant-design/pro-components'
 import { UserOutlined, LockOutlined } from '@ant-design/icons'
 import { message } from 'antd'
-import api from '../utils/api'
+import { useTranslation } from 'react-i18next'
+import { loginApiV1AuthLoginPost } from '../api/client'
 import { setToken, setUsername } from '../utils/auth'
+import { LanguageSwitcher } from '../components/LanguageSwitcher'
 
 interface LoginProps {
   onLoginSuccess: () => void
@@ -11,39 +13,52 @@ interface LoginProps {
 
 const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const [loading, setLoading] = useState(false)
+  const { t } = useTranslation()
 
   const handleSubmit = async (values: { username: string; password: string }) => {
     setLoading(true)
     try {
-      const formData = new URLSearchParams()
-      formData.append('username', values.username)
-      formData.append('password', values.password)
-
-      const response = await api.post('/auth/login', formData, {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+      const { data, error } = await loginApiV1AuthLoginPost({
+        body: {
+          username: values.username,
+          password: values.password,
         },
       })
 
-      setToken(response.data.access_token)
-      setUsername(values.username)
-      message.success('Login successful')
-      onLoginSuccess()
-    } catch (error) {
-      // Error handled by interceptor
+      if (error) {
+        message.error((error as { detail?: string }).detail || t('auth.loginFailed'))
+        return
+      }
+
+      if (data) {
+        setToken(data.access_token)
+        setUsername(values.username)
+        message.success(t('auth.loginSuccess'))
+        onLoginSuccess()
+      }
+    } catch (err) {
+      message.error(t('errors.networkError'))
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 relative">
+      <div className="absolute top-4 right-4">
+        <LanguageSwitcher />
+      </div>
       <div className="w-full max-w-md">
         <LoginForm
           title="ML Server Manager"
-          subTitle="Multi-node ML workspace & job management system"
+          subTitle={t('auth.signInToContinue')}
           onFinish={handleSubmit}
           loading={loading}
+          submitter={{
+            searchConfig: {
+              submitText: t('auth.login'),
+            },
+          }}
         >
           <ProFormText
             name="username"
@@ -51,11 +66,11 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               size: 'large',
               prefix: <UserOutlined />,
             }}
-            placeholder="Username"
+            placeholder={t('auth.username')}
             rules={[
               {
                 required: true,
-                message: 'Please enter your username',
+                message: t('auth.username'),
               },
             ]}
           />
@@ -65,11 +80,11 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               size: 'large',
               prefix: <LockOutlined />,
             }}
-            placeholder="Password"
+            placeholder={t('auth.password')}
             rules={[
               {
                 required: true,
-                message: 'Please enter your password',
+                message: t('auth.password'),
               },
             ]}
           />

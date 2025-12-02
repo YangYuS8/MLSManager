@@ -50,7 +50,7 @@ class Settings(BaseSettings):
 
     # Default Admin User (for development/initial setup)
     default_admin_username: str = "mlsmanager"
-    default_admin_email: str = "admin@mlsmanager.local"
+    default_admin_email: str = "admin@mlsmanager.dev"
     default_admin_password: str = "mlsmanager_secret"
 
 
