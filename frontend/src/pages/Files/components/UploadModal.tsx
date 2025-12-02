@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Modal, Upload, message, Progress, List, Space } from 'antd'
 import { InboxOutlined, FileOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons'
 import type { UploadFile, UploadProps } from 'antd'
+import { getToken } from '../../../utils/auth'
 
 const { Dragger } = Upload
 
@@ -54,7 +55,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
         const formData = new FormData()
         formData.append('file', file.originFileObj as Blob)
 
-        const token = localStorage.getItem('token')
+        const token = getToken()
         const response = await fetch(
           `/api/v1/files/upload?path=${encodeURIComponent(currentPath)}&overwrite=false`,
           {

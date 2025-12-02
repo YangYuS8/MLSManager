@@ -13,6 +13,7 @@ import { Dropdown } from 'antd'
 import { useTranslation } from 'react-i18next'
 import { removeToken, getUsername } from '../utils/auth'
 import { LanguageSwitcher } from '../components/LanguageSwitcher'
+import NodeSelector from '../components/NodeSelector'
 
 interface BasicLayoutProps {
   onLogout: () => void
@@ -77,7 +78,10 @@ const BasicLayout: React.FC<BasicLayoutProps> = ({ onLogout }) => {
       pathname: location.pathname,
     },
     menuItemRender: (item, dom) => <div onClick={() => navigate(item.path || '/')}>{dom}</div>,
-    actionsRender: () => [<LanguageSwitcher key="lang" />],
+    actionsRender: () => [
+      <NodeSelector key="node" />,
+      <LanguageSwitcher key="lang" />,
+    ],
     avatarProps: {
       src: undefined,
       title: username || 'User',

@@ -87,6 +87,11 @@
       "total": "Total",
       "online": "Online",
       "offline": "Offline"
+    },
+    "status": {
+      "online": "Online",
+      "offline": "Offline",
+      "busy": "Busy"
     }
   },
   "datasets": {
@@ -245,5 +250,15 @@
     "moveErrors": "{{count}} item(s) failed to move",
     "copySuccess": "{{count}} item(s) copied successfully",
     "copyErrors": "{{count}} item(s) failed to copy"
+  },
+  "nodeSelector": {
+    "selectNode": "Select Node",
+    "noNodes": "No nodes available",
+    "master": "Master",
+    "refresh": "Refresh nodes",
+    "manageNodes": "Manage all nodes",
+    "currentNode": "Current Node",
+    "nodeOffline": "Node is offline, please select another",
+    "switchedTo": "Switched to {{name}}"
   }
 }

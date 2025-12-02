@@ -1,6 +1,6 @@
 # Change: 导航栏节点选择器
 
-## Status: 📋 待实现
+## Status: ✅ 已完成
 
 ## Why
 当前系统的计算节点管理分散在单独的节点管理页面，用户在执行任务提交、文件管理等操作时，需要频繁切换页面来选择目标节点。将节点选择器放在导航栏可以：
@@ -117,14 +117,14 @@ frontend/src/
 
 ## Implementation Order
 
-1. [ ] 创建 `NodeContext` 全局状态
-2. [ ] 创建 `NodeSelector` 组件
-3. [ ] 集成到 `BasicLayout` 导航栏
-4. [ ] 添加 `localStorage` 持久化
-5. [ ] 更新 Jobs 页面使用当前节点
-6. [ ] 更新 Files 页面使用当前节点
-7. [ ] 添加 i18n 翻译
-8. [ ] 添加节点状态实时更新（可选 WebSocket）
+1. [x] 创建 `NodeContext` 全局状态
+2. [x] 创建 `NodeSelector` 组件
+3. [x] 集成到 `BasicLayout` 导航栏
+4. [x] 添加 `localStorage` 持久化
+5. [ ] 更新 Jobs 页面使用当前节点（未来增强）
+6. [ ] 更新 Files 页面使用当前节点（未来增强）
+7. [x] 添加 i18n 翻译
+8. [ ] 添加节点状态实时更新（未来可选 WebSocket）
 
 ## UX Considerations
 

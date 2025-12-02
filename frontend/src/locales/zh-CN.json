@@ -87,6 +87,11 @@
       "total": "总计",
       "online": "在线",
       "offline": "离线"
+    },
+    "status": {
+      "online": "在线",
+      "offline": "离线",
+      "busy": "繁忙"
     }
   },
   "datasets": {
@@ -245,5 +250,15 @@
     "moveErrors": "{{count}} 个项目移动失败",
     "copySuccess": "成功复制 {{count}} 个项目",
     "copyErrors": "{{count}} 个项目复制失败"
+  },
+  "nodeSelector": {
+    "selectNode": "选择节点",
+    "noNodes": "暂无可用节点",
+    "master": "主节点",
+    "refresh": "刷新节点列表",
+    "manageNodes": "管理全部节点",
+    "currentNode": "当前节点",
+    "nodeOffline": "节点已离线，请选择其他节点",
+    "switchedTo": "已切换到 {{name}}"
   }
 }
