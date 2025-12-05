@@ -1627,6 +1627,120 @@ export type NodeUpdate = {
 }
 
 /**
+ * PanelConfig
+ *
+ * Public panel configuration for frontend.
+ */
+export type PanelConfig = {
+  /**
+   * Site Name
+   *
+   * Site name
+   */
+  site_name?: string
+  /**
+   * Site Description
+   *
+   * Site description
+   */
+  site_description?: string
+  /**
+   * Primary Color
+   *
+   * Primary theme color
+   */
+  primary_color?: string
+  /**
+   * Dark Mode
+   *
+   * Dark mode enabled
+   */
+  dark_mode?: boolean
+  /**
+   * Allow Registration
+   *
+   * Allow registration
+   */
+  allow_registration?: boolean
+  /**
+   * Maintenance Mode
+   *
+   * Maintenance mode
+   */
+  maintenance_mode?: boolean
+  /**
+   * Announcement
+   *
+   * System announcement
+   */
+  announcement?: string
+  /**
+   * Logo Url
+   *
+   * Logo URL
+   */
+  logo_url?: string
+}
+
+/**
+ * SettingResponse
+ *
+ * Schema for setting response.
+ */
+export type SettingResponse = {
+  /**
+   * Key
+   *
+   * Setting key
+   */
+  key: string
+  /**
+   * Value
+   *
+   * Setting value
+   */
+  value: string
+  /**
+   * Description
+   *
+   * Setting description
+   */
+  description?: string | null
+}
+
+/**
+ * SettingsBatchUpdate
+ *
+ * Schema for batch updating settings.
+ */
+export type SettingsBatchUpdate = {
+  /**
+   * Settings
+   *
+   * Settings to update as key-value pairs
+   */
+  settings: {
+    [key: string]: string
+  }
+}
+
+/**
+ * SettingsResponse
+ *
+ * Schema for all settings response.
+ */
+export type SettingsResponse = {
+  /**
+   * Settings
+   *
+   * All settings as key-value pairs
+   */
+  settings: {
+    [key: string]: string
+  }
+}
+
+/**
  * Token
  *
  * JWT token response.
@@ -3538,6 +3652,153 @@ export type DecompressArchiveApiV1FilesDecompressPostResponses = {
 
 export type DecompressArchiveApiV1FilesDecompressPostResponse =
   DecompressArchiveApiV1FilesDecompressPostResponses[keyof DecompressArchiveApiV1FilesDecompressPostResponses]
+
+export type GetPanelConfigApiV1SettingsConfigGetData = {
+  body?: never
+  path?: never
+  query?: never
+  url: '/api/v1/settings/config'
+}
+
+export type GetPanelConfigApiV1SettingsConfigGetResponses = {
+  /**
+   * Successful Response
+   */
+  200: PanelConfig
+}
+
+export type GetPanelConfigApiV1SettingsConfigGetResponse =
+  GetPanelConfigApiV1SettingsConfigGetResponses[keyof GetPanelConfigApiV1SettingsConfigGetResponses]
+
+export type GetAllSettingsApiV1SettingsGetData = {
+  body?: never
+  path?: never
+  query?: never
+  url: '/api/v1/settings'
+}
+
+export type GetAllSettingsApiV1SettingsGetResponses = {
+  /**
+   * Successful Response
+   */
+  200: SettingsResponse
+}
+
+export type GetAllSettingsApiV1SettingsGetResponse =
+  GetAllSettingsApiV1SettingsGetResponses[keyof GetAllSettingsApiV1SettingsGetResponses]
+
+export type BatchUpdateSettingsApiV1SettingsPutData = {
+  body: SettingsBatchUpdate
+  path?: never
+  query?: never
+  url: '/api/v1/settings'
+}
+
+export type BatchUpdateSettingsApiV1SettingsPutErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError
+}
+
+export type BatchUpdateSettingsApiV1SettingsPutError =
+  BatchUpdateSettingsApiV1SettingsPutErrors[keyof BatchUpdateSettingsApiV1SettingsPutErrors]
+
+export type BatchUpdateSettingsApiV1SettingsPutResponses = {
+  /**
+   * Successful Response
+   */
+  200: SettingsResponse
+}
+
+export type BatchUpdateSettingsApiV1SettingsPutResponse =
+  BatchUpdateSettingsApiV1SettingsPutResponses[keyof BatchUpdateSettingsApiV1SettingsPutResponses]
+
+export type GetSettingApiV1SettingsKeyGetData = {
+  body?: never
+  path: {
+    /**
+     * Key
+     */
+    key: string
+  }
+  query?: never
+  url: '/api/v1/settings/{key}'
+}
+
+export type GetSettingApiV1SettingsKeyGetErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError
+}
+
+export type GetSettingApiV1SettingsKeyGetError =
+  GetSettingApiV1SettingsKeyGetErrors[keyof GetSettingApiV1SettingsKeyGetErrors]
+
+export type GetSettingApiV1SettingsKeyGetResponses = {
+  /**
+   * Successful Response
+   */
+  200: SettingResponse
+}
+
+export type GetSettingApiV1SettingsKeyGetResponse =
+  GetSettingApiV1SettingsKeyGetResponses[keyof GetSettingApiV1SettingsKeyGetResponses]
+
+export type UpdateSettingApiV1SettingsKeyPutData = {
+  body?: never
+  path: {
+    /**
+     * Key
+     */
+    key: string
+  }
+  query: {
+    /**
+     * Value
+     */
+    value: string
+  }
+  url: '/api/v1/settings/{key}'
+}
+
+export type UpdateSettingApiV1SettingsKeyPutErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError
+}
+
+export type UpdateSettingApiV1SettingsKeyPutError =
+  UpdateSettingApiV1SettingsKeyPutErrors[keyof UpdateSettingApiV1SettingsKeyPutErrors]
+
+export type UpdateSettingApiV1SettingsKeyPutResponses = {
+  /**
+   * Successful Response
+   */
+  200: SettingResponse
+}
+
+export type UpdateSettingApiV1SettingsKeyPutResponse =
+  UpdateSettingApiV1SettingsKeyPutResponses[keyof UpdateSettingApiV1SettingsKeyPutResponses]
+
+export type ResetSettingsApiV1SettingsResetPostData = {
+  body?: never
+  path?: never
+  query?: never
+  url: '/api/v1/settings/reset'
+}
+
+export type ResetSettingsApiV1SettingsResetPostResponses = {
+  /**
+   * Successful Response
+   */
+  200: SettingsResponse
+}
+
+export type ResetSettingsApiV1SettingsResetPostResponse =
+  ResetSettingsApiV1SettingsResetPostResponses[keyof ResetSettingsApiV1SettingsResetPostResponses]
 
 export type HealthCheckHealthGetData = {
   body?: never

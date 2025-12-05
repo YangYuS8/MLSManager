@@ -14,6 +14,9 @@ import type {
   BatchRegisterDatasetsApiV1DatasetsBatchPostData,
   BatchRegisterDatasetsApiV1DatasetsBatchPostErrors,
   BatchRegisterDatasetsApiV1DatasetsBatchPostResponses,
+  BatchUpdateSettingsApiV1SettingsPutData,
+  BatchUpdateSettingsApiV1SettingsPutErrors,
+  BatchUpdateSettingsApiV1SettingsPutResponses,
   CancelJobApiV1JobsJobIdCancelPostData,
   CancelJobApiV1JobsJobIdCancelPostErrors,
   CancelJobApiV1JobsJobIdCancelPostResponses,
@@ -53,6 +56,8 @@ import type {
   DownloadFileApiV1FilesDownloadGetData,
   DownloadFileApiV1FilesDownloadGetErrors,
   DownloadFileApiV1FilesDownloadGetResponses,
+  GetAllSettingsApiV1SettingsGetData,
+  GetAllSettingsApiV1SettingsGetResponses,
   GetCurrentUserInfoApiV1UsersMeGetData,
   GetCurrentUserInfoApiV1UsersMeGetResponses,
   GetDatasetApiV1DatasetsDatasetIdGetData,
@@ -80,6 +85,11 @@ import type {
   GetNodeApiV1NodesNodeIdGetResponses,
   GetNodeStatsApiV1NodesStatsGetData,
   GetNodeStatsApiV1NodesStatsGetResponses,
+  GetPanelConfigApiV1SettingsConfigGetData,
+  GetPanelConfigApiV1SettingsConfigGetResponses,
+  GetSettingApiV1SettingsKeyGetData,
+  GetSettingApiV1SettingsKeyGetErrors,
+  GetSettingApiV1SettingsKeyGetResponses,
   GetUserApiV1UsersUserIdGetData,
   GetUserApiV1UsersUserIdGetErrors,
   GetUserApiV1UsersUserIdGetResponses,
@@ -127,6 +137,8 @@ import type {
   RenameFileApiV1FilesRenamePutData,
   RenameFileApiV1FilesRenamePutErrors,
   RenameFileApiV1FilesRenamePutResponses,
+  ResetSettingsApiV1SettingsResetPostData,
+  ResetSettingsApiV1SettingsResetPostResponses,
   SearchDatasetsApiV1DatasetsSearchGetData,
   SearchDatasetsApiV1DatasetsSearchGetErrors,
   SearchDatasetsApiV1DatasetsSearchGetResponses,
@@ -145,6 +157,9 @@ import type {
   UpdateNodeApiV1NodesNodeIdPatchData,
   UpdateNodeApiV1NodesNodeIdPatchErrors,
   UpdateNodeApiV1NodesNodeIdPatchResponses,
+  UpdateSettingApiV1SettingsKeyPutData,
+  UpdateSettingApiV1SettingsKeyPutErrors,
+  UpdateSettingApiV1SettingsKeyPutResponses,
   UpdateUserApiV1UsersUserIdPatchData,
   UpdateUserApiV1UsersUserIdPatchErrors,
   UpdateUserApiV1UsersUserIdPatchResponses,
@@ -1189,6 +1204,123 @@ export const decompressArchiveApiV1FilesDecompressPost = <ThrowOnError extends b
       'Content-Type': 'application/json',
       ...options.headers,
     },
+  })
+
+/**
+ * Get Panel Config
+ *
+ * Get public panel configuration.
+ *
+ * This endpoint is public and returns the panel configuration
+ * needed by the frontend to render the UI.
+ */
+export const getPanelConfigApiV1SettingsConfigGet = <ThrowOnError extends boolean = false>(
+  options?: Options<GetPanelConfigApiV1SettingsConfigGetData, ThrowOnError>
+) =>
+  (options?.client ?? client).get<
+    GetPanelConfigApiV1SettingsConfigGetResponses,
+    unknown,
+    ThrowOnError
+  >({ url: '/api/v1/settings/config', ...options })
+
+/**
+ * Get All Settings
+ *
+ * Get all system settings.
+ *
+ * Requires SUPERADMIN privileges.
+ */
+export const getAllSettingsApiV1SettingsGet = <ThrowOnError extends boolean = false>(
+  options?: Options<GetAllSettingsApiV1SettingsGetData, ThrowOnError>
+) =>
+  (options?.client ?? client).get<GetAllSettingsApiV1SettingsGetResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/settings',
+    ...options,
+  })
+
+/**
+ * Batch Update Settings
+ *
+ * Batch update multiple settings.
+ *
+ * Requires SUPERADMIN privileges.
+ */
+export const batchUpdateSettingsApiV1SettingsPut = <ThrowOnError extends boolean = false>(
+  options: Options<BatchUpdateSettingsApiV1SettingsPutData, ThrowOnError>
+) =>
+  (options.client ?? client).put<
+    BatchUpdateSettingsApiV1SettingsPutResponses,
+    BatchUpdateSettingsApiV1SettingsPutErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/settings',
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  })
+
+/**
+ * Get Setting
+ *
+ * Get a specific setting by key.
+ *
+ * Requires SUPERADMIN privileges.
+ */
+export const getSettingApiV1SettingsKeyGet = <ThrowOnError extends boolean = false>(
+  options: Options<GetSettingApiV1SettingsKeyGetData, ThrowOnError>
+) =>
+  (options.client ?? client).get<
+    GetSettingApiV1SettingsKeyGetResponses,
+    GetSettingApiV1SettingsKeyGetErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/settings/{key}',
+    ...options,
+  })
+
+/**
+ * Update Setting
+ *
+ * Update a specific setting.
+ *
+ * Requires SUPERADMIN privileges.
+ */
+export const updateSettingApiV1SettingsKeyPut = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateSettingApiV1SettingsKeyPutData, ThrowOnError>
+) =>
+  (options.client ?? client).put<
+    UpdateSettingApiV1SettingsKeyPutResponses,
+    UpdateSettingApiV1SettingsKeyPutErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/settings/{key}',
+    ...options,
+  })
+
+/**
+ * Reset Settings
+ *
+ * Reset all settings to defaults.
+ *
+ * Requires SUPERADMIN privileges.
+ */
+export const resetSettingsApiV1SettingsResetPost = <ThrowOnError extends boolean = false>(
+  options?: Options<ResetSettingsApiV1SettingsResetPostData, ThrowOnError>
+) =>
+  (options?.client ?? client).post<
+    ResetSettingsApiV1SettingsResetPostResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/settings/reset',
+    ...options,
   })
 
 /**
