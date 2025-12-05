@@ -1,0 +1,26 @@
+# Binaries
+/agent
+/tmp/
+*.exe
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+/dist/
+/bin/
+
+# Logs
+*.log
+build-errors.log
+
+# Agent token and data
+.ml-agent/
+data/

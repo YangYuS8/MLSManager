@@ -1,38 +1,36 @@
-# Worker Agent Dockerfile using uv
-FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+# Build stage
+FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
 
-# Use Aliyun mirror for apt (China)
-RUN sed -i 's/deb.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list.d/debian.sources 2>/dev/null || true
+# Install build dependencies
+RUN apk add --no-cache git ca-certificates
 
-# Enable bytecode compilation
-ENV UV_COMPILE_BYTECODE=1
+# Copy go mod files
+COPY go.mod go.sum ./
 
-# Copy from the cache instead of linking since it's a mounted volume
-ENV UV_LINK_MODE=copy
+# Download dependencies
+RUN go mod download
 
-# Install the project's dependencies using the lockfile and settings
-RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=uv.lock,target=uv.lock \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --frozen --no-install-project --no-dev
-
-# Copy the project into the image
+# Copy source code
 COPY . .
 
-# Sync the project
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev
+# Build the binary
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o /agent ./cmd/agent
 
-# Set environment variables
-ENV AGENT_MASTER_URL=http://backend:8000
-ENV AGENT_NODE_ID=worker-001
-ENV AGENT_HEARTBEAT_INTERVAL=30
+# Runtime stage
+FROM alpine:3.21
+
+RUN apk add --no-cache ca-certificates bash docker-cli
+
+WORKDIR /app
+
+COPY --from=builder /agent /app/agent
+
+RUN mkdir -p /data /etc/ml-agent
+
+# Environment variables are loaded from .env via docker-compose
+# Only set minimal required defaults here
 ENV AGENT_STORAGE_PATH=/data
 
-# Create data directory
-RUN mkdir -p /data
-
-# Run the agent
-CMD ["uv", "run", "python", "agent.py"]
+ENTRYPOINT ["/app/agent"]
