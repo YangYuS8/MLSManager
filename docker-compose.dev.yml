@@ -1,5 +1,6 @@
 # ML-Server-Manager Development Environment
 # Docker Compose configuration with hot-reload support
+# All environment variables are loaded from .env.dev
 
 services:
   # PostgreSQL Database
@@ -7,16 +8,14 @@ services:
     image: postgres:16-alpine
     container_name: mlsmanager-dev-db
     restart: unless-stopped
-    environment:
-      POSTGRES_USER: mlsmanager
-      POSTGRES_PASSWORD: mlsmanager_secret
-      POSTGRES_DB: mlsmanager
+    env_file:
+      - .env.dev
     volumes:
       - postgres_dev_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U mlsmanager"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mlsmanager}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -26,9 +25,8 @@ services:
     image: rabbitmq:3-management-alpine
     container_name: mlsmanager-dev-rabbitmq
     restart: unless-stopped
-    environment:
-      RABBITMQ_DEFAULT_USER: mlsmanager
-      RABBITMQ_DEFAULT_PASS: mlsmanager_secret
+    env_file:
+      - .env.dev
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -55,9 +53,9 @@ services:
     env_file:
       - .env.dev
     environment:
-      DATABASE_URL: postgresql+asyncpg://mlsmanager:mlsmanager_secret@db:5432/mlsmanager
-      RABBITMQ_URL: amqp://mlsmanager:mlsmanager_secret@rabbitmq:5672//
-      CELERY_RESULT_BACKEND: rpc://
+      # Override with Docker-internal URLs
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-mlsmanager}:${POSTGRES_PASSWORD:-mlsmanager_secret}@db:5432/${POSTGRES_DB:-mlsmanager}
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER:-mlsmanager}:${RABBITMQ_DEFAULT_PASS:-mlsmanager_secret}@rabbitmq:5672//
     volumes:
       # Mount source code for hot-reload
       - ./backend:/app
@@ -85,8 +83,8 @@ services:
         - NO_PROXY=${NO_PROXY:-localhost,127.0.0.1}
     container_name: mlsmanager-dev-frontend
     restart: unless-stopped
-    environment:
-      - VITE_API_BASE_URL=http://localhost:8000
+    env_file:
+      - .env.dev
     volumes:
       # Mount source code for hot-reload
       - ./frontend:/app
@@ -97,5 +95,37 @@ services:
     depends_on:
       - backend
 
+  # Worker Agent (Go version with hot-reload)
+  # Comment out this service if you don't want to deploy a local worker node
+  worker:
+    build:
+      context: ./worker_agent
+      dockerfile: Dockerfile.dev
+      network: host
+      args:
+        - HTTP_PROXY=${HTTP_PROXY:-}
+        - HTTPS_PROXY=${HTTPS_PROXY:-}
+        - http_proxy=${HTTP_PROXY:-}
+        - https_proxy=${HTTPS_PROXY:-}
+        - NO_PROXY=${NO_PROXY:-localhost,127.0.0.1}
+    container_name: mlsmanager-dev-worker
+    restart: unless-stopped
+    env_file:
+      - .env.dev
+    environment:
+      # Override with Docker-internal URL
+      AGENT_MASTER_URL: http://backend:8000
+    volumes:
+      # Mount source code for hot-reload
+      - ./worker_agent:/app
+      # Persistent data directory
+      - worker_dev_data:/data
+      # Token storage
+      - worker_dev_token:/etc/ml-agent
+    depends_on:
+      - backend
+
 volumes:
   postgres_dev_data:
+  worker_dev_data:
+  worker_dev_token:

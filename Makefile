@@ -1,17 +1,28 @@
-.PHONY: help dev dev-up dev-down dev-logs dev-logs-backend dev-logs-frontend \
+.PHONY: help \
+        dev dev-up dev-down dev-logs dev-logs-backend dev-logs-frontend dev-build dev-restart \
+        local local-backend local-frontend local-worker services services-up services-down services-logs \
         prod prod-up prod-down prod-logs prod-build \
-        clean clean-volumes dev-build
+        clean clean-volumes
 
-# Proxy settings (override with: make dev-build HTTP_PROXY=http://... HTTPS_PROXY=http://...)
-HTTP_PROXY ?=
-HTTPS_PROXY ?=
+# Load environment variables from .env.dev for local development
+# Note: These are defaults, can be overridden by command line
+-include .env.dev
+export
 
 # Default target
 help:
 	@echo "ML-Server-Manager Development Commands"
 	@echo ""
-	@echo "Development Environment (hot-reload):"
-	@echo "  make dev              - Start development environment"
+	@echo "=== Local Development (Hot-Reload) ==="
+	@echo "  make services         - Start only db + rabbitmq (Docker)"
+	@echo "  make services-up      - Start services in background"
+	@echo "  make services-down    - Stop services"
+	@echo "  make local-backend    - Run backend locally with hot-reload (requires services)"
+	@echo "  make local-frontend   - Run frontend locally with hot-reload"
+	@echo "  make local-worker     - Run worker locally with hot-reload (requires services)"
+	@echo ""
+	@echo "=== Docker Development (Full Stack) ==="
+	@echo "  make dev              - Start full development environment"
 	@echo "  make dev-up           - Start dev containers in background"
 	@echo "  make dev-down         - Stop development environment"
 	@echo "  make dev-build        - Build dev images (use HTTP_PROXY=... for proxy)"
@@ -19,22 +30,59 @@ help:
 	@echo "  make dev-logs-backend - View backend logs only"
 	@echo "  make dev-logs-frontend- View frontend logs only"
 	@echo "  make dev-logs-db      - View database logs only"
+	@echo "  make dev-logs-worker  - View worker logs only"
 	@echo ""
-	@echo "Production Environment:"
+	@echo "=== Production Environment ==="
 	@echo "  make prod             - Start production environment"
 	@echo "  make prod-up          - Start prod containers in background"
 	@echo "  make prod-down        - Stop production environment"
 	@echo "  make prod-logs        - View all prod container logs"
 	@echo "  make prod-build       - Build production images"
 	@echo ""
-	@echo "Cleanup:"
+	@echo "=== Cleanup ==="
 	@echo "  make clean            - Stop all containers and remove images"
 	@echo "  make clean-volumes    - Remove all volumes (WARNING: deletes data)"
 	@echo ""
-	@echo "Proxy usage example:"
-	@echo "  make dev-build HTTP_PROXY=http://127.0.0.1:7897 HTTPS_PROXY=http://127.0.0.1:7897"
+	@echo "Environment variables are loaded from .env.dev (local dev) or .env (production)"
 
-# ==================== Development Environment ====================
+# ==================== Local Development (Hot-Reload) ====================
+
+# Start only infrastructure services (db + rabbitmq)
+services:
+	docker compose -f docker-compose.dev.yml up db rabbitmq
+
+services-up:
+	docker compose -f docker-compose.dev.yml up -d db rabbitmq
+
+services-down:
+	docker compose -f docker-compose.dev.yml stop db rabbitmq
+
+services-logs:
+	docker compose -f docker-compose.dev.yml logs -f db rabbitmq
+
+# Local backend with hot-reload (uses DATABASE_URL from .env.dev)
+local-backend:
+	@echo "Starting backend with hot-reload..."
+	@echo "Make sure services are running: make services-up"
+	cd backend && uv run uvicorn main:app --reload --host 0.0.0.0 --port 8000
+
+# Local frontend with hot-reload (uses VITE_API_BASE_URL from .env.dev)
+local-frontend:
+	@echo "Starting frontend with hot-reload..."
+	cd frontend && pnpm dev
+
+# Local worker with hot-reload (uses AGENT_* from .env.dev)
+# Requires air: go install github.com/air-verse/air@latest
+local-worker:
+	@echo "Starting worker agent with hot-reload..."
+	@echo "Make sure services are running: make services-up"
+	cd worker_agent && \
+		AGENT_STORAGE_PATH="$(PWD)/worker_agent/data" \
+		AGENT_DATASETS_PATH="$(PWD)/worker_agent/data/datasets" \
+		AGENT_TOKEN_FILE="$(PWD)/worker_agent/.ml-agent/token" \
+		air
+
+# ==================== Docker Development Environment ====================
 
 dev:
 	docker compose -f docker-compose.dev.yml up
@@ -46,7 +94,7 @@ dev-down:
 	docker compose -f docker-compose.dev.yml down
 
 dev-build:
-	HTTP_PROXY=$(HTTP_PROXY) HTTPS_PROXY=$(HTTPS_PROXY) docker compose -f docker-compose.dev.yml build
+	docker compose -f docker-compose.dev.yml build
 
 dev-logs:
 	docker compose -f docker-compose.dev.yml logs -f
@@ -59,6 +107,9 @@ dev-logs-frontend:
 
 dev-logs-db:
 	docker compose -f docker-compose.dev.yml logs -f db
+
+dev-logs-worker:
+	docker compose -f docker-compose.dev.yml logs -f worker
 
 dev-restart:
 	docker compose -f docker-compose.dev.yml restart
