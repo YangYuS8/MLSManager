@@ -49,7 +49,30 @@ This repository implements a lightweight multi‑node / per‑server ML‑worksp
 
 ## Development / Build / Run Commands
 
-### Frontend  
+### Local Development (Recommended)
+
+```bash
+# Step 1: Start infrastructure services
+make services-up      # start db + rabbitmq in background
+
+# Step 2: Run components locally with hot-reload (in separate terminals)
+make local-backend    # backend with uvicorn --reload
+make local-frontend   # frontend with vite dev
+make local-worker     # worker with air hot-reload
+```
+
+### Full-Stack Docker Development
+
+```bash
+make dev              # start all services with docker-compose (hot-reload)
+make dev-up           # start in background
+make dev-down         # stop services
+make dev-logs         # view logs
+make dev-build        # rebuild images (use HTTP_PROXY=... for proxy)
+```
+
+### Frontend Commands
+
 ```bash
 cd frontend  
 pnpm install  
@@ -63,43 +86,36 @@ pnpm format:check     # check formatting without changes
 pnpm generate:api     # generate TypeScript API client from OpenAPI spec
 ```
 
-### Backend (development)
+### Backend Commands
 
 ```bash
 cd backend
-
-# Using uv (recommended)
 uv sync               # install dependencies
 uv run uvicorn main:app --reload --host 0.0.0.0 --port 8000
-
-# Code quality
 uv run ruff check .   # lint Python code
 uv run ruff format .  # format Python code
 ```
 
-### Full‑stack (Docker / docker‑compose)
+### Worker Agent Commands (Go)
 
 ```bash
-docker-compose up -d        # spin up master node services (backend / frontend / db / queue / etc.)  
-docker-compose down          # stop services  
-```
-
-### Worker node (agent) registration / startup
-
-```bash
-# Development
 cd worker_agent
-uv sync               # install dependencies
-uv run python agent.py
+go mod download       # install dependencies
+go run ./cmd/agent    # run agent
+go build -o agent ./cmd/agent  # build binary
 
-# Code quality
-uv run ruff check .   # lint Python code
-uv run ruff format .  # format Python code
+# With hot-reload (requires air)
+go install github.com/air-verse/air@latest
+air                   # run with hot-reload
+```
 
-# Docker deployment
-# on each worker server:
-# install docker, configure environment variables (master URL, node id / secret, etc.)
-# run agent registration script or docker‑compose / container for worker_agent
+### Production Deployment
+
+```bash
+make prod             # start production environment
+make prod-up          # start in background
+make prod-down        # stop services
+make prod-build       # build production images
 ```
 
 ## Project Structure (suggested)
@@ -108,10 +124,10 @@ uv run ruff format .  # format Python code
 /                  # project root
   /backend/         # FastAPI + API + job & node logic + database / ORM + agent interface
   /frontend/        # React + TS + Ant Design + Tailwind + UI components / pages
-  /worker_agent/    # worker‑node side agent / scripts: dataset scan / metadata report / job launch / status sync
+  /worker_agent/    # Go-based worker node agent: dataset scan / metadata report / job launch / status sync
   /infra/           # docker‑compose files, deployment / startup / registration scripts, configs, .env.example
   /docs/            # design docs, architecture diagrams, usage guides, README, CONTRIBUTING, etc.
-  README.md          # project overview, quick start, usage guide
+  Makefile          # unified development commands
   AGENTS.md          # this file — project spec / tech stack / conventions / guidelines
   .env.example       # template environment configuration
 ```
