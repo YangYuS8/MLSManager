@@ -11,6 +11,7 @@ from app.core.database import Base
 
 if TYPE_CHECKING:
     from app.models.job import Job
+    from app.models.project import Project
 
 
 class UserRole(str, Enum):
@@ -44,6 +45,7 @@ class User(Base):
 
     # Relationships
     jobs: Mapped[list["Job"]] = relationship("Job", back_populates="owner")
+    projects: Mapped[list["Project"]] = relationship("Project", back_populates="owner")
 
     def __repr__(self) -> str:
         return f"<User(id={self.id}, username={self.username}, role={self.role})>"

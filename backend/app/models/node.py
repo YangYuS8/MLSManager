@@ -12,6 +12,7 @@ from app.core.database import Base
 if TYPE_CHECKING:
     from app.models.dataset import Dataset
     from app.models.job import Job
+    from app.models.project import Project
 
 
 class NodeType(str, Enum):
@@ -68,6 +69,7 @@ class Node(Base):
     # Relationships
     datasets: Mapped[list["Dataset"]] = relationship("Dataset", back_populates="node")
     jobs: Mapped[list["Job"]] = relationship("Job", back_populates="node")
+    projects: Mapped[list["Project"]] = relationship("Project", back_populates="node")
 
     def __repr__(self) -> str:
         return f"<Node(id={self.id}, node_id={self.node_id}, status={self.status})>"
