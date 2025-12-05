@@ -1,5 +1,6 @@
 const TOKEN_KEY = 'mlsmanager_token'
 const USERNAME_KEY = 'mlsmanager_username'
+const USER_ROLE_KEY = 'mlsmanager_role'
 
 export const getToken = (): string | null => {
   return localStorage.getItem(TOKEN_KEY)
@@ -12,6 +13,7 @@ export const setToken = (token: string): void => {
 export const removeToken = (): void => {
   localStorage.removeItem(TOKEN_KEY)
   localStorage.removeItem(USERNAME_KEY)
+  localStorage.removeItem(USER_ROLE_KEY)
 }
 
 export const getUsername = (): string | null => {
@@ -20,4 +22,12 @@ export const getUsername = (): string | null => {
 
 export const setUsername = (username: string): void => {
   localStorage.setItem(USERNAME_KEY, username)
+}
+
+export const getUserRole = (): string | null => {
+  return localStorage.getItem(USER_ROLE_KEY)
+}
+
+export const setUserRole = (role: string): void => {
+  localStorage.setItem(USER_ROLE_KEY, role)
 }

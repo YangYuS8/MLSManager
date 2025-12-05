@@ -7,11 +7,14 @@ import {
   UserOutlined,
   LogoutOutlined,
   FolderOutlined,
+  SettingOutlined,
+  CodeOutlined,
+  ProfileOutlined,
 } from '@ant-design/icons'
 import { ProLayout, ProLayoutProps } from '@ant-design/pro-components'
 import { Dropdown } from 'antd'
 import { useTranslation } from 'react-i18next'
-import { removeToken, getUsername } from '../utils/auth'
+import { removeToken, getUsername, getUserRole } from '../utils/auth'
 import { LanguageSwitcher } from '../components/LanguageSwitcher'
 import NodeSelector from '../components/NodeSelector'
 
@@ -23,6 +26,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = ({ onLogout }) => {
   const navigate = useNavigate()
   const location = useLocation()
   const username = getUsername()
+  const userRole = getUserRole()
   const { t } = useTranslation()
 
   const menuItems = [
@@ -52,10 +56,25 @@ const BasicLayout: React.FC<BasicLayoutProps> = ({ onLogout }) => {
       icon: <FolderOutlined />,
     },
     {
+      path: '/projects',
+      name: t('nav.projects') || 'Projects',
+      icon: <CodeOutlined />,
+    },
+    {
       path: '/users',
       name: t('nav.users'),
       icon: <UserOutlined />,
     },
+    // Only show settings menu for superadmin
+    ...(userRole === 'superadmin'
+      ? [
+          {
+            path: '/settings',
+            name: t('nav.settings'),
+            icon: <SettingOutlined />,
+          },
+        ]
+      : []),
   ]
 
   const handleLogout = () => {
@@ -66,7 +85,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = ({ onLogout }) => {
 
   const layoutSettings: ProLayoutProps = {
     title: 'ML Server Manager',
-    logo: '/vite.svg',
+    logo: '/logo.svg',
     layout: 'mix',
     splitMenus: false,
     fixedHeader: true,
@@ -89,6 +108,15 @@ const BasicLayout: React.FC<BasicLayoutProps> = ({ onLogout }) => {
         <Dropdown
           menu={{
             items: [
+              {
+                key: 'profile',
+                icon: <ProfileOutlined />,
+                label: t('profile.title'),
+                onClick: () => navigate('/profile'),
+              },
+              {
+                type: 'divider',
+              },
               {
                 key: 'logout',
                 icon: <LogoutOutlined />,

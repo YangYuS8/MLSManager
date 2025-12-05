@@ -8,6 +8,10 @@ import Datasets from './pages/Datasets'
 import Jobs from './pages/Jobs'
 import Users from './pages/Users'
 import Files from './pages/Files'
+import Settings from './pages/Settings'
+import Projects from './pages/Projects'
+import ProjectEditor from './pages/Projects/components/ProjectEditor'
+import Profile from './pages/Profile'
 import { getToken } from './utils/auth'
 import { NodeProvider } from './contexts/NodeContext'
 
@@ -39,6 +43,10 @@ function App() {
           <Route path="jobs" element={<Jobs />} />
           <Route path="files" element={<Files />} />
           <Route path="users" element={<Users />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="projects" element={<Projects />} />
+          <Route path="projects/:projectId/editor" element={<ProjectEditor />} />
+          <Route path="profile" element={<Profile />} />
         </Route>
         <Route path="/login" element={<Navigate to="/dashboard" replace />} />
       </Routes>

@@ -3,8 +3,8 @@ import { LoginForm, ProFormText } from '@ant-design/pro-components'
 import { UserOutlined, LockOutlined } from '@ant-design/icons'
 import { message } from 'antd'
 import { useTranslation } from 'react-i18next'
-import { loginApiV1AuthLoginPost } from '../api/client'
-import { setToken, setUsername } from '../utils/auth'
+import { loginApiV1AuthLoginPost, getCurrentUserInfoApiV1UsersMeGet } from '../api/client'
+import { setToken, setUsername, setUserRole } from '../utils/auth'
 import { LanguageSwitcher } from '../components/LanguageSwitcher'
 
 interface LoginProps {
@@ -33,6 +33,21 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       if (data) {
         setToken(data.access_token)
         setUsername(values.username)
+
+        // Fetch user info to get role
+        try {
+          const userInfo = await getCurrentUserInfoApiV1UsersMeGet({
+            headers: {
+              Authorization: `Bearer ${data.access_token}`,
+            },
+          })
+          if (userInfo.data?.role) {
+            setUserRole(userInfo.data.role)
+          }
+        } catch (err) {
+          console.error('Failed to fetch user info:', err)
+        }
+
         message.success(t('auth.loginSuccess'))
         onLoginSuccess()
       }
