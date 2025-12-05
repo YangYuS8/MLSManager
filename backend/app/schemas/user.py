@@ -55,10 +55,32 @@ class UserUpdate(BaseModel):
     is_active: bool | None = Field(None, description="Account active status")
 
 
-class UserRead(UserBase):
+class UserProfileUpdate(BaseModel):
+    """Schema for user updating their own profile."""
+
+    email: EmailStr | None = Field(None, description="New email address")
+    full_name: str | None = Field(None, max_length=100, description="New display name")
+
+
+class PasswordChange(BaseModel):
+    """Schema for changing password."""
+
+    current_password: str = Field(..., description="Current password")
+    new_password: str = Field(
+        ...,
+        min_length=8,
+        max_length=100,
+        description="New password (8-100 characters)",
+    )
+
+
+class UserRead(BaseModel):
     """Schema for reading user data."""
 
     id: int = Field(..., description="Unique user ID", examples=[1])
+    username: str = Field(..., description="Unique username for login")
+    email: str = Field(..., description="User's email address")  # Use str for read to avoid validation issues with existing data
+    full_name: str | None = Field(None, description="User's display name")
     role: UserRole = Field(..., description="User role")
     is_active: bool = Field(..., description="Whether account is active")
     created_at: datetime = Field(..., description="Account creation timestamp")

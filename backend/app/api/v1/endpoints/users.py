@@ -4,8 +4,9 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 
 from app.api.deps import AdminUser, CurrentUser, DbSession
+from app.core.security import get_password_hash, verify_password
 from app.models.user import User
-from app.schemas.user import UserRead, UserUpdate
+from app.schemas.user import UserRead, UserUpdate, UserProfileUpdate, PasswordChange
 
 router = APIRouter()
 
@@ -19,6 +20,67 @@ router = APIRouter()
 async def get_current_user_info(current_user: CurrentUser) -> User:
     """Get current authenticated user's profile information."""
     return current_user
+
+
+@router.patch(
+    "/me",
+    response_model=UserRead,
+    summary="Update current user profile",
+    description="Update the profile of the currently authenticated user.",
+)
+async def update_current_user(
+    db: DbSession,
+    current_user: CurrentUser,
+    user_in: UserProfileUpdate,
+) -> User:
+    """Update current user's profile (email, full_name only)."""
+    update_data = user_in.model_dump(exclude_unset=True)
+    
+    # Check if email is being changed and is unique
+    if "email" in update_data and update_data["email"]:
+        existing = await db.execute(
+            select(User).where(
+                User.email == update_data["email"],
+                User.id != current_user.id
+            )
+        )
+        if existing.scalar_one_or_none():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already registered",
+            )
+    
+    for field, value in update_data.items():
+        setattr(current_user, field, value)
+    
+    await db.commit()
+    await db.refresh(current_user)
+    return current_user
+
+
+@router.post(
+    "/me/password",
+    summary="Change password",
+    description="Change the password of the currently authenticated user.",
+)
+async def change_password(
+    db: DbSession,
+    current_user: CurrentUser,
+    password_data: PasswordChange,
+) -> dict:
+    """Change current user's password."""
+    # Verify current password
+    if not verify_password(password_data.current_password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect current password",
+        )
+    
+    # Update password
+    current_user.hashed_password = get_password_hash(password_data.new_password)
+    await db.commit()
+    
+    return {"message": "Password changed successfully"}
 
 
 @router.get(
