@@ -275,7 +275,7 @@ async def delete_project(
     project_id: int,
     db: DbSession,
     current_user: CurrentUser,
-    delete_files: bool = False,
+    delete_files: bool = True,  # Default to True: always delete local files
 ) -> None:
     """Delete a project."""
     result = await db.execute(
