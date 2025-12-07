@@ -339,7 +339,6 @@
     "gitUrl": "Git 仓库地址",
     "gitBranch": "分支",
     "localPath": "本地路径",
-    "status": "状态",
     "owner": "所有者",
     "node": "所在节点",
     "isPublic": "公开项目",

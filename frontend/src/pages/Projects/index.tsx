@@ -195,9 +195,10 @@ const Projects: React.FC = () => {
     }
   }
 
-  const handleDelete = async (id: number, deleteFiles: boolean = false) => {
+  const handleDelete = async (id: number) => {
     try {
-      const response = await fetch(`/api/v1/projects/${id}?delete_files=${deleteFiles}`, {
+      // Always delete local files when deleting project
+      const response = await fetch(`/api/v1/projects/${id}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${getToken()}`,
@@ -294,7 +295,7 @@ const Projects: React.FC = () => {
         ),
     },
     {
-      title: t('projects.status'),
+      title: t('common.status'),
       dataIndex: 'status',
       key: 'status',
       width: 100,
@@ -346,7 +347,7 @@ const Projects: React.FC = () => {
           )}
           <Popconfirm
             title={t('projects.deleteConfirm')}
-            onConfirm={() => handleDelete(record.id, false)}
+            onConfirm={() => handleDelete(record.id)}
             okText={t('common.yes')}
             cancelText={t('common.no')}
           >

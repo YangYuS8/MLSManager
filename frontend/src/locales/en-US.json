@@ -339,7 +339,6 @@
     "gitUrl": "Git Repository URL",
     "gitBranch": "Branch",
     "localPath": "Local Path",
-    "status": "Status",
     "owner": "Owner",
     "node": "Node",
     "isPublic": "Public Project",
