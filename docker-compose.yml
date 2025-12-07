@@ -98,7 +98,37 @@ services:
       backend:
         condition: service_healthy
 
+  # Code-Server (VS Code in Browser for Project Editing)
+  code-server:
+    image: codercom/code-server:latest
+    container_name: mlsmanager-codeserver
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      PASSWORD: ${CODE_SERVER_PASSWORD:-mlsmanager}
+    volumes:
+      # Mount projects directory
+      - ${PROJECTS_ROOT_PATH:-./projects}:/home/coder/workspace:rw
+      # Persist code-server config (extensions, settings)
+      - code_server_config:/home/coder/.config
+      # Persist workspace states and data
+      - code_server_data:/home/coder/.local/share/code-server
+    ports:
+      - "${CODE_SERVER_PORT:-8443}:8000"
+    command: ["--auth=password", "--disable-telemetry"]
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
 volumes:
   postgres_data:
   worker_data:
   worker_token:
+  code_server_config:
+  code_server_data:
