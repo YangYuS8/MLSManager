@@ -26,6 +26,21 @@ from app.schemas.project import (
 router = APIRouter()
 
 
+def get_projects_root() -> str:
+    """
+    Get the root directory for all projects.
+    
+    This path is shared with code-server's workspace.
+    Uses PROJECTS_ROOT_PATH env var, defaults to ./projects.
+    """
+    projects_root = os.getenv("PROJECTS_ROOT_PATH", "./projects")
+    # Convert to absolute path
+    abs_path = os.path.abspath(projects_root)
+    # Create directory if it doesn't exist
+    os.makedirs(abs_path, exist_ok=True)
+    return abs_path
+
+
 def run_git_command(cwd: str, *args: str) -> tuple[bool, str]:
     """Run a git command and return (success, output)."""
     try:
@@ -94,13 +109,22 @@ async def create_project(
             detail="Node not found",
         )
     
+    # Determine local path - use provided or auto-generate under PROJECTS_ROOT_PATH
+    local_path = project_in.local_path
+    if not local_path:
+        base_path = get_projects_root()
+        local_path = os.path.join(base_path, f"{current_user.id}_{project_in.name}")
+    
+    # Create project directory if it doesn't exist
+    os.makedirs(local_path, exist_ok=True)
+    
     # Create project
     project = Project(
         name=project_in.name,
         description=project_in.description,
         git_url=project_in.git_url,
         git_branch=project_in.git_branch,
-        local_path=project_in.local_path,
+        local_path=local_path,
         node_id=project_in.node_id,
         owner_id=current_user.id,
         is_public=project_in.is_public,
@@ -137,8 +161,9 @@ async def clone_project(
     if clone_request.local_path:
         local_path = clone_request.local_path
     else:
-        # Auto-generate path under node's storage path
-        base_path = node.storage_path or "/data/projects"
+        # Auto-generate path under PROJECTS_ROOT_PATH (shared with code-server)
+        base_path = get_projects_root()
+        # Use user_id and project name for unique folder
         local_path = os.path.join(base_path, f"{current_user.id}_{clone_request.name}")
     
     # Check if path already exists

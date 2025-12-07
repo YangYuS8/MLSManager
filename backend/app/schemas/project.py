@@ -27,7 +27,7 @@ class ProjectCreate(ProjectBase):
 
     git_url: str | None = Field(None, description="Git repository URL")
     git_branch: str = Field(default="main", description="Git branch to clone")
-    local_path: str = Field(..., description="Local path for the project")
+    local_path: str | None = Field(None, description="Local path for the project (auto-generated if not provided)")
     node_id: int = Field(..., description="Node ID where project resides")
     is_public: bool = Field(default=False, description="Is project publicly visible")
     auto_sync: bool = Field(default=False, description="Auto-sync with git remote")
