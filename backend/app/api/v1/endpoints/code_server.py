@@ -1,5 +1,6 @@
 """Code-Server API endpoints for project editing."""
 
+import logging
 import os
 from urllib.parse import quote
 
@@ -10,6 +11,8 @@ from sqlalchemy import select
 from app.api.deps import CurrentUser, DbSession
 from app.core.config import settings
 from app.models.project import Project
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/code-server", tags=["code-server"])
 
@@ -40,8 +43,10 @@ def get_code_server_base_url() -> str:
 
 
 def get_projects_root() -> str:
-    """Get the projects root path."""
-    return os.getenv("PROJECTS_ROOT_PATH", "./projects")
+    """Get the projects root path (absolute path)."""
+    projects_root = os.getenv("PROJECTS_ROOT_PATH", "./projects")
+    # Always return absolute path
+    return os.path.abspath(projects_root)
 
 
 def validate_project_path(project_path: str) -> bool:
@@ -49,10 +54,43 @@ def validate_project_path(project_path: str) -> bool:
     Validate that the project path is safe and within projects root.
     
     Prevents path traversal attacks.
+    Only validates the path string, does not check if path exists.
     """
-    projects_root = os.path.realpath(get_projects_root())
-    full_path = os.path.realpath(os.path.join(projects_root, project_path))
-    return full_path.startswith(projects_root)
+    # Normalize the path to prevent traversal attacks
+    # Remove leading slashes and normalize ../ sequences
+    normalized = os.path.normpath(project_path)
+    
+    # Check for path traversal attempts
+    if normalized.startswith("..") or normalized.startswith("/"):
+        return False
+    
+    # Check for suspicious patterns
+    if ".." in normalized:
+        return False
+    
+    return True
+
+
+def get_project_workspace_path(project_local_path: str) -> str:
+    """
+    Convert a project's local_path to the workspace path inside code-server.
+    
+    The project's local_path might be:
+    1. Absolute path on the node (e.g., /data/projects/myproject)
+    2. Relative path (e.g., projects/myproject)
+    
+    In code-server, all projects are under /home/coder/workspace/
+    We use the last component of the path as the project folder name.
+    """
+    # Extract the basename (last path component)
+    # This ensures projects are always in the workspace root
+    project_name = os.path.basename(os.path.normpath(project_local_path))
+    
+    if not project_name:
+        # Fallback: use the full path but make it safe
+        project_name = project_local_path.replace("/", "_").replace("\\", "_")
+    
+    return f"/home/coder/workspace/{project_name}"
 
 
 @router.get(
@@ -122,29 +160,11 @@ async def get_project_editor_url(
                 detail="You don't have access to this project",
             )
     
-    # Get project path relative to projects root
-    # The project's local_path should be relative to PROJECTS_ROOT_PATH
-    project_path = project.local_path
-    
-    # If local_path is absolute, extract relative part
-    projects_root = get_projects_root()
-    if os.path.isabs(project_path):
-        try:
-            project_path = os.path.relpath(project_path, projects_root)
-        except ValueError:
-            # On Windows, relpath can fail across drives
-            project_path = os.path.basename(project_path)
-    
-    # Validate path to prevent traversal
-    if not validate_project_path(project_path):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid project path configuration",
-        )
+    # Get the workspace path inside code-server container
+    workspace_path = get_project_workspace_path(project.local_path)
+    logger.info(f"Project {project.id} local_path: {project.local_path} -> workspace_path: {workspace_path}")
     
     # Build code-server URL with folder parameter
-    # The workspace path in code-server container is /home/coder/workspace/{project_path}
-    workspace_path = f"/home/coder/workspace/{project_path}"
     base_url = get_code_server_base_url()
     
     # URL encode the folder path
@@ -166,6 +186,7 @@ async def get_project_editor_url(
     Generate a code-server URL for a specific project path.
     
     This endpoint allows direct access by path without project ID.
+    The path should be a folder name within the workspace.
     Use with caution - validate permissions appropriately.
     """,
     responses={
@@ -180,16 +201,19 @@ async def get_editor_url_by_path(
     Get the code-server URL for a project path directly.
     
     Useful when project path is known but ID is not available.
+    The project_path should be the folder name (no absolute paths).
     """
     # Validate path to prevent traversal
     if not validate_project_path(project_path):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid project path",
+            detail="Invalid project path: path traversal not allowed",
         )
     
     # Build code-server URL
-    workspace_path = f"/home/coder/workspace/{project_path}"
+    # Use only the basename to ensure security
+    safe_path = os.path.basename(os.path.normpath(project_path))
+    workspace_path = f"/home/coder/workspace/{safe_path}"
     base_url = get_code_server_base_url()
     
     encoded_path = quote(workspace_path, safe="")
@@ -197,6 +221,6 @@ async def get_editor_url_by_path(
     
     return CodeServerURLResponse(
         url=url,
-        project_name=os.path.basename(project_path),
+        project_name=safe_path,
         workspace_path=workspace_path,
     )
