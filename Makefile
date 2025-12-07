@@ -14,7 +14,7 @@ help:
 	@echo "ML-Server-Manager Development Commands"
 	@echo ""
 	@echo "=== Local Development (Hot-Reload) ==="
-	@echo "  make services         - Start only db + rabbitmq (Docker)"
+	@echo "  make services         - Start db + rabbitmq + code-server (Docker)"
 	@echo "  make services-up      - Start services in background"
 	@echo "  make services-down    - Stop services"
 	@echo "  make local-backend    - Run backend locally with hot-reload (requires services)"
@@ -31,6 +31,7 @@ help:
 	@echo "  make dev-logs-frontend- View frontend logs only"
 	@echo "  make dev-logs-db      - View database logs only"
 	@echo "  make dev-logs-worker  - View worker logs only"
+	@echo "  make dev-logs-codeserver - View code-server logs"
 	@echo ""
 	@echo "=== Production Environment ==="
 	@echo "  make prod             - Start production environment"
@@ -47,18 +48,18 @@ help:
 
 # ==================== Local Development (Hot-Reload) ====================
 
-# Start only infrastructure services (db + rabbitmq)
+# Start only infrastructure services (db + rabbitmq + code-server)
 services:
-	docker compose -f docker-compose.dev.yml up db rabbitmq
+	docker compose -f docker-compose.dev.yml up db rabbitmq code-server
 
 services-up:
-	docker compose -f docker-compose.dev.yml up -d db rabbitmq
+	docker compose -f docker-compose.dev.yml up -d db rabbitmq code-server
 
 services-down:
-	docker compose -f docker-compose.dev.yml stop db rabbitmq
+	docker compose -f docker-compose.dev.yml stop db rabbitmq code-server
 
 services-logs:
-	docker compose -f docker-compose.dev.yml logs -f db rabbitmq
+	docker compose -f docker-compose.dev.yml logs -f db rabbitmq code-server
 
 # Local backend with hot-reload (uses DATABASE_URL from .env.dev)
 local-backend:
@@ -111,6 +112,9 @@ dev-logs-db:
 dev-logs-worker:
 	docker compose -f docker-compose.dev.yml logs -f worker
 
+dev-logs-codeserver:
+	docker compose -f docker-compose.dev.yml logs -f code-server
+
 dev-restart:
 	docker compose -f docker-compose.dev.yml restart
 
@@ -119,6 +123,9 @@ dev-restart-backend:
 
 dev-restart-frontend:
 	docker compose -f docker-compose.dev.yml restart frontend
+
+dev-restart-codeserver:
+	docker compose -f docker-compose.dev.yml restart code-server
 
 # ==================== Production Environment ====================
 
