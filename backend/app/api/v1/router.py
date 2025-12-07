@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import auth, users, nodes, datasets, jobs, files, settings, projects
+from app.api.v1.endpoints import auth, users, nodes, datasets, jobs, files, settings, projects, code_server
 
 api_router = APIRouter()
 
@@ -14,3 +14,4 @@ api_router.include_router(jobs.router, prefix="/jobs", tags=["jobs"])
 api_router.include_router(files.router, prefix="/files", tags=["files"])
 api_router.include_router(settings.router, prefix="/settings", tags=["settings"])
 api_router.include_router(projects.router, prefix="/projects", tags=["projects"])
+api_router.include_router(code_server.router)
