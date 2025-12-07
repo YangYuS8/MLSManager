@@ -22,6 +22,7 @@ from app.schemas.project import (
     ProjectRead,
     ProjectUpdate,
 )
+from app.services.worker_client import worker_client, WorkerUnreachableError
 
 router = APIRouter()
 
@@ -139,13 +140,13 @@ async def create_project(
     return project
 
 
-@router.post("/clone", response_model=ProjectRead, status_code=status.HTTP_201_CREATED)
+@router.post("/clone", response_model=ProjectRead, status_code=status.HTTP_202_ACCEPTED)
 async def clone_project(
     clone_request: ProjectCloneRequest,
     db: DbSession,
     current_user: CurrentUser,
 ) -> Project:
-    """Clone a git repository as a new project."""
+    """Clone a git repository as a new project (delegated to worker node)."""
     # Verify node exists
     node_result = await db.execute(
         select(Node).where(Node.id == clone_request.node_id)
@@ -157,63 +158,56 @@ async def clone_project(
             detail="Node not found",
         )
     
-    # Determine local path
-    if clone_request.local_path:
-        local_path = clone_request.local_path
-    else:
-        # Auto-generate path under PROJECTS_ROOT_PATH (shared with code-server)
-        base_path = get_projects_root()
-        # Use user_id and project name for unique folder
-        local_path = os.path.join(base_path, f"{current_user.id}_{clone_request.name}")
-    
-    # Check if path already exists
-    if os.path.exists(local_path):
+    # Check if worker node is online
+    if not await worker_client.check_node_online(node):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Path already exists: {local_path}",
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Worker node is offline or unreachable",
         )
     
-    # Create project record first
+    # Generate target path (relative path, worker will resolve it)
+    if clone_request.local_path:
+        target_path = clone_request.local_path
+    else:
+        # Auto-generate relative path: {user_id}_{project_name}
+        target_path = f"{current_user.id}_{clone_request.name}"
+    
+    # Create project record with PENDING status
     project = Project(
         name=clone_request.name,
         description=clone_request.description,
         git_url=clone_request.git_url,
         git_branch=clone_request.git_branch,
-        local_path=local_path,
+        local_path=target_path,  # Store relative path
         node_id=clone_request.node_id,
         owner_id=current_user.id,
-        status=ProjectStatus.SYNCING.value,
+        status=ProjectStatus.PENDING.value,
     )
     
     db.add(project)
     await db.commit()
     await db.refresh(project)
     
-    # Clone the repository
+    # Send clone request to worker node
     try:
-        # Create parent directory if needed
-        os.makedirs(os.path.dirname(local_path), exist_ok=True)
-        
-        # Clone
-        success, output = run_git_command(
-            os.path.dirname(local_path),
-            "clone",
-            "--branch", clone_request.git_branch,
-            clone_request.git_url,
-            os.path.basename(local_path),
+        accepted = await worker_client.clone_project(
+            node=node,
+            project_id=project.id,
+            git_url=clone_request.git_url,
+            branch=clone_request.git_branch,
+            target_path=target_path,
         )
         
-        if success:
-            project.status = ProjectStatus.ACTIVE.value
-            project.last_sync_at = datetime.now(timezone.utc)
+        if accepted:
+            project.status = ProjectStatus.SYNCING.value
         else:
             project.status = ProjectStatus.ERROR.value
-            project.sync_error = output
+            project.sync_error = "Worker rejected clone request"
         
         await db.commit()
         await db.refresh(project)
         
-    except Exception as e:
+    except WorkerUnreachableError as e:
         project.status = ProjectStatus.ERROR.value
         project.sync_error = str(e)
         await db.commit()
@@ -321,10 +315,25 @@ async def delete_project(
             detail="Only the owner can delete this project",
         )
     
-    # Optionally delete files
-    if delete_files and os.path.exists(project.local_path):
-        import shutil
-        shutil.rmtree(project.local_path)
+    # Optionally delete files on worker node
+    if delete_files and project.local_path:
+        # Get node to send delete request
+        node_result = await db.execute(
+            select(Node).where(Node.id == project.node_id)
+        )
+        node = node_result.scalar_one_or_none()
+        
+        if node:
+            try:
+                await worker_client.delete_project(
+                    node=node,
+                    project_id=project.id,
+                    project_path=project.local_path,
+                )
+            except WorkerUnreachableError:
+                # Worker offline, continue with DB deletion
+                # Files can be cleaned up manually later
+                pass
     
     await db.delete(project)
     await db.commit()

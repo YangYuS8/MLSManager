@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/YangYuS8/mlsmanager-worker-agent/internal/client"
+	"github.com/YangYuS8/mlsmanager-worker/internal/client"
 )
 
 // Scanner scans directories for datasets.

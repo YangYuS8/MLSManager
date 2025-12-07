@@ -1,4 +1,4 @@
-module github.com/YangYuS8/mlsmanager-worker-agent
+module github.com/YangYuS8/mlsmanager-worker
 
 go 1.25
 

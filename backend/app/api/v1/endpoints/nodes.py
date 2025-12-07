@@ -61,7 +61,9 @@ async def register_worker_node(
         node_id=node_in.node_id,
         name=node_in.name,
         host=node_in.host,
+        hostname=node_in.hostname,
         port=node_in.port,
+        agent_port=node_in.agent_port,
         storage_path=node_in.storage_path,
         system_info=system_info if system_info else None,
     )

@@ -4,16 +4,18 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
 	"time"
 
-	"github.com/YangYuS8/mlsmanager-worker-agent/internal/client"
-	"github.com/YangYuS8/mlsmanager-worker-agent/internal/config"
-	"github.com/YangYuS8/mlsmanager-worker-agent/internal/executor"
-	"github.com/YangYuS8/mlsmanager-worker-agent/internal/scanner"
+	"github.com/YangYuS8/mlsmanager-worker/internal/api"
+	"github.com/YangYuS8/mlsmanager-worker/internal/client"
+	"github.com/YangYuS8/mlsmanager-worker/internal/config"
+	"github.com/YangYuS8/mlsmanager-worker/internal/executor"
+	"github.com/YangYuS8/mlsmanager-worker/internal/scanner"
 )
 
 func main() {
@@ -57,6 +59,16 @@ func main() {
 	exec := executor.NewExecutor(cfg, masterClient)
 	scan := scanner.NewScanner()
 
+	// Start HTTP API server
+	apiServer := api.NewServer(cfg, masterClient)
+	go func() {
+		addr := fmt.Sprintf(":%d", cfg.APIPort)
+		log("INFO", "Starting HTTP API server on %s", addr)
+		if err := apiServer.Start(addr); err != nil && err != http.ErrServerClosed {
+			log("ERROR", "API server error: %v", err)
+		}
+	}()
+
 	// Start main loop
 	if err := runMainLoop(ctx, cfg, masterClient, exec, scan); err != nil {
 		if err != context.Canceled {
@@ -65,6 +77,11 @@ func main() {
 	}
 
 	// Cleanup
+	log("INFO", "Shutting down API server...")
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer shutdownCancel()
+	apiServer.Shutdown(shutdownCtx)
+
 	log("INFO", "Cancelling running jobs...")
 	exec.CancelAll()
 
@@ -80,6 +97,7 @@ func printBanner(cfg *config.Config) {
 	log("INFO", "Node Name:    %s", cfg.NodeName)
 	log("INFO", "Hostname:     %s", cfg.NodeHostname)
 	log("INFO", "Master URL:   %s", cfg.MasterURL)
+	log("INFO", "API Port:     %d", cfg.APIPort)
 	log("INFO", "Storage Path: %s", cfg.StoragePath)
 	log("INFO", "Dev Mode:     %v", cfg.DevMode)
 	log("INFO", strings.Repeat("=", 60))

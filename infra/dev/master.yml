@@ -1,0 +1,47 @@
+# ML-Server-Manager Development Environment - Master Node
+# 开发模式：仅运行基础设施服务 (db + rabbitmq)
+# 前端和后端在本地以热重载方式运行
+#
+# Usage (从项目根目录):
+#   docker compose -f infra/dev/master.yml up -d
+#   make dev-master  # 或使用 Makefile
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    container_name: mlsm-dev-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-mlsmanager}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mlsmanager_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-mlsmanager}
+    volumes:
+      # 使用绑定挂载，数据存储在项目根目录的 data/postgres
+      - ../../data/postgres:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mlsmanager}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # RabbitMQ (for async task queue)
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: mlsm-dev-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-mlsmanager}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-mlsmanager_secret}
+    volumes:
+      - ../../data/rabbitmq:/var/lib/rabbitmq
+    ports:
+      - "${RABBITMQ_PORT:-5672}:5672"
+      - "${RABBITMQ_MGMT_PORT:-15672}:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

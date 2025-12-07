@@ -55,15 +55,15 @@
 - `backend/app/api/v1/endpoints/datasets.py` - 添加批量注册/搜索端点
 - `backend/app/schemas/node.py` - 添加 NodeRegister, NodeStats 等 schema
 - `backend/app/schemas/dataset.py` - 添加 DatasetBatchRegister 等 schema
-- `worker_agent/agent.py` - 完整重写，支持任务执行和数据集扫描
-- `worker_agent/pyproject.toml` - 更新依赖
+- `worker/agent.py` - 完整重写，支持任务执行和数据集扫描
+- `worker/pyproject.toml` - 更新依赖
 
 ## 待完成
 - ⬜ Celery 后台任务（节点离线检测、任务超时处理）
 - ⬜ 端到端测试验证
 
 ## Impact
-- Affected: `backend/app/`, `worker_agent/`
+- Affected: `backend/app/`, `worker/`
 - 新增服务层架构，提高代码可维护性
 - Master-Worker 通信基础设施就绪
 - 核心功能实现完成，可进行集成测试

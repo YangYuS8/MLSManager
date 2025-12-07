@@ -109,6 +109,9 @@ class NodeRead(NodeBase):
     node_type: NodeType = Field(..., description="Node type")
     status: NodeStatus = Field(..., description="Current status")
     is_active: bool = Field(..., description="Whether node is active")
+    hostname: str | None = Field(None, description="Hostname for agent communication")
+    agent_port: int | None = Field(8081, description="Worker agent HTTP API port")
+    code_server_port: int | None = Field(8443, description="Code-server port for project editing")
     cpu_count: int | None = Field(None, description="CPU core count")
     memory_total_gb: int | None = Field(None, description="Total memory (GB)")
     gpu_count: int | None = Field(None, description="GPU count")
@@ -144,10 +147,21 @@ class NodeRegister(BaseModel):
         description="Node hostname or IP (as seen by master)",
         examples=["192.168.1.100"],
     )
+    hostname: str | None = Field(
+        None,
+        max_length=255,
+        description="Hostname for agent communication (defaults to host)",
+        examples=["worker-001.local"],
+    )
     port: int = Field(
         default=8000,
         description="Node API port",
         examples=[8000],
+    )
+    agent_port: int = Field(
+        default=8081,
+        description="Worker agent HTTP API port",
+        examples=[8081],
     )
     storage_path: str | None = Field(
         None,

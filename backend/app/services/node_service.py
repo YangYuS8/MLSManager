@@ -70,6 +70,8 @@ class NodeService:
         name: str,
         host: str,
         port: int = 8000,
+        hostname: str | None = None,
+        agent_port: int = 8081,
         storage_path: str | None = None,
         system_info: dict | None = None,
     ) -> tuple[Node, str]:
@@ -80,11 +82,20 @@ class NodeService:
         result = await self.db.execute(select(Node).where(Node.node_id == node_id))
         node = result.scalar_one_or_none()
 
+        # Generate agent token
+        token = create_access_token(
+            data={"sub": f"agent:{node_id}", "type": "agent", "node_id": node_id},
+            expires_delta=timedelta(days=365),  # Long-lived token for agents
+        )
+
         if node:
             # Update existing node
             node.name = name
             node.host = host
+            node.hostname = hostname or host
             node.port = port
+            node.agent_port = agent_port
+            node.agent_token = token  # Store token for callback verification
             node.status = NodeStatus.ONLINE.value
             node.last_heartbeat = datetime.now(UTC)
             if storage_path:
@@ -98,7 +109,10 @@ class NodeService:
                 name=name,
                 node_type="worker",
                 host=host,
+                hostname=hostname or host,
                 port=port,
+                agent_port=agent_port,
+                agent_token=token,  # Store token for callback verification
                 status=NodeStatus.ONLINE.value,
                 storage_path=storage_path,
                 last_heartbeat=datetime.now(UTC),
@@ -109,12 +123,6 @@ class NodeService:
 
         await self.db.commit()
         await self.db.refresh(node)
-
-        # Generate agent token
-        token = create_access_token(
-            data={"sub": f"agent:{node_id}", "type": "agent", "node_id": node_id},
-            expires_delta=timedelta(days=365),  # Long-lived token for agents
-        )
 
         return node, token
 

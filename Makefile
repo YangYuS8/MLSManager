@@ -1,156 +1,159 @@
-.PHONY: help \
-        dev dev-up dev-down dev-logs dev-logs-backend dev-logs-frontend dev-build dev-restart \
-        local local-backend local-frontend local-worker services services-up services-down services-logs \
-        prod prod-up prod-down prod-logs prod-build \
-        clean clean-volumes
+# ML-Server-Manager Makefile
+# 简化的开发和生产命令
 
-# Load environment variables from .env.dev for local development
-# Note: These are defaults, can be overridden by command line
--include .env.dev
-export
+.PHONY: help init \
+        dev-master dev-worker dev-services dev-down \
+        prod-master prod-worker prod-down \
+        logs clean
 
-# Default target
+# =============================================================================
+# 默认目标
+# =============================================================================
+
 help:
-	@echo "ML-Server-Manager Development Commands"
+	@echo "ML-Server-Manager 命令"
 	@echo ""
-	@echo "=== Local Development (Hot-Reload) ==="
-	@echo "  make services         - Start db + rabbitmq + code-server (Docker)"
-	@echo "  make services-up      - Start services in background"
-	@echo "  make services-down    - Stop services"
-	@echo "  make local-backend    - Run backend locally with hot-reload (requires services)"
-	@echo "  make local-frontend   - Run frontend locally with hot-reload"
-	@echo "  make local-worker     - Run worker locally with hot-reload (requires services)"
+	@echo "=== 初始化 ==="
+	@echo "  make init             初始化数据目录 (首次运行)"
 	@echo ""
-	@echo "=== Docker Development (Full Stack) ==="
-	@echo "  make dev              - Start full development environment"
-	@echo "  make dev-up           - Start dev containers in background"
-	@echo "  make dev-down         - Stop development environment"
-	@echo "  make dev-build        - Build dev images (use HTTP_PROXY=... for proxy)"
-	@echo "  make dev-logs         - View all dev container logs"
-	@echo "  make dev-logs-backend - View backend logs only"
-	@echo "  make dev-logs-frontend- View frontend logs only"
-	@echo "  make dev-logs-db      - View database logs only"
-	@echo "  make dev-logs-worker  - View worker logs only"
-	@echo "  make dev-logs-codeserver - View code-server logs"
+	@echo "=== 开发模式 (Docker + 本地热重载) ==="
+	@echo "  make dev-master       启动 Master 开发环境"
+	@echo "                        (Docker: db/rabbitmq, 本地: backend/frontend)"
+	@echo "  make dev-worker       启动 Worker 开发环境"
+	@echo "                        (Docker: code-server, 本地: worker)"
+	@echo "  make dev-services     仅启动 Docker 服务"
+	@echo "  make dev-down         停止开发环境"
 	@echo ""
-	@echo "=== Production Environment ==="
-	@echo "  make prod             - Start production environment"
-	@echo "  make prod-up          - Start prod containers in background"
-	@echo "  make prod-down        - Stop production environment"
-	@echo "  make prod-logs        - View all prod container logs"
-	@echo "  make prod-build       - Build production images"
+	@echo "=== 生产模式 (Podman) ==="
+	@echo "  make prod-master      启动 Master 生产环境"
+	@echo "  make prod-worker      启动 Worker 生产环境"
+	@echo "  make prod-down        停止生产环境"
 	@echo ""
-	@echo "=== Cleanup ==="
-	@echo "  make clean            - Stop all containers and remove images"
-	@echo "  make clean-volumes    - Remove all volumes (WARNING: deletes data)"
+	@echo "=== 工具 ==="
+	@echo "  make logs             查看日志"
+	@echo "  make clean            清理容器和镜像"
 	@echo ""
-	@echo "Environment variables are loaded from .env.dev (local dev) or .env (production)"
+	@echo "配置文件: infra/dev/.env.* (开发) | infra/prod/.env.* (生产)"
 
-# ==================== Local Development (Hot-Reload) ====================
+# =============================================================================
+# 初始化
+# =============================================================================
 
-# Start only infrastructure services (db + rabbitmq + code-server)
-services:
-	docker compose -f docker-compose.dev.yml up db rabbitmq code-server
+init:
+	@echo "创建数据目录..."
+	mkdir -p data/postgres
+	mkdir -p data/rabbitmq
+	mkdir -p data/projects
+	mkdir -p data/datasets
+	mkdir -p data/jobs
+	mkdir -p data/.ml-agent
+	mkdir -p data/.code-server/config
+	mkdir -p data/.code-server/data
+	chmod -R 755 data
+	@echo ""
+	@echo "复制环境变量模板..."
+	@test -f infra/dev/.env.master || cp infra/dev/.env.master.example infra/dev/.env.master
+	@test -f infra/dev/.env.worker || cp infra/dev/.env.worker.example infra/dev/.env.worker
+	@echo "完成! 请检查并修改 infra/dev/.env.* 中的配置"
 
-services-up:
-	docker compose -f docker-compose.dev.yml up -d db rabbitmq code-server
+# =============================================================================
+# 开发模式
+# =============================================================================
 
-services-down:
-	docker compose -f docker-compose.dev.yml stop db rabbitmq code-server
+# 启动 Docker 服务 (db + rabbitmq + code-server)
+dev-services-up:
+	@echo "启动开发服务 (db + rabbitmq + code-server)..."
+	docker compose -f infra/dev/master.yml --env-file infra/dev/.env.master up -d
+	docker compose -f infra/dev/worker.yml --env-file infra/dev/.env.worker up -d
 
-services-logs:
-	docker compose -f docker-compose.dev.yml logs -f db rabbitmq code-server
+# 停止 Docker 服务
+dev-services-down:
+	docker compose -f infra/dev/master.yml --env-file infra/dev/.env.master down
+	docker compose -f infra/dev/worker.yml --env-file infra/dev/.env.worker down
+	@echo "开发服务已停止"
 
-# Local backend with hot-reload (uses DATABASE_URL from .env.dev)
-local-backend:
-	@echo "Starting backend with hot-reload..."
-	@echo "Make sure services are running: make services-up"
+# 启动后端开发环境 (热重载)
+dev-backend:
+	@echo "启动 Backend (热重载)..."
 	cd backend && uv run uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
-# Local frontend with hot-reload (uses VITE_API_BASE_URL from .env.dev)
-local-frontend:
-	@echo "Starting frontend with hot-reload..."
+# 启动前端开发环境 (热重载)
+dev-frontend:
+	@echo "启动 Frontend (热重载)..."
 	cd frontend && pnpm dev
 
-# Local worker with hot-reload (uses AGENT_* from .env.dev)
-# Requires air: go install github.com/air-verse/air@latest
-local-worker:
-	@echo "Starting worker agent with hot-reload..."
-	@echo "Make sure services are running: make services-up"
-	cd worker_agent && \
-		AGENT_STORAGE_PATH="$(PWD)/worker_agent/data" \
-		AGENT_DATASETS_PATH="$(PWD)/worker_agent/data/datasets" \
-		AGENT_TOKEN_FILE="$(PWD)/worker_agent/.ml-agent/token" \
-		air
+# 启动 Worker开发环境 (热重载)
+dev-worker:
+	@echo "启动 Worker (热重载)..."
+	cd worker && \
+	  AGENT_STORAGE_PATH="$(PWD)/data" \
+	  AGENT_DATASETS_PATH="$(PWD)/data/datasets" \
+	  AGENT_PROJECTS_PATH="$(PWD)/data/projects" \
+	  AGENT_TOKEN_FILE="$(PWD)/data/.ml-agent/token" \
+	  air
 
-# ==================== Docker Development Environment ====================
+# =============================================================================
+# 生产模式 (Podman)
+# =============================================================================
 
-dev:
-	docker compose -f docker-compose.dev.yml up
+# Master 生产环境
+prod-master:
+	@echo "启动 Master 生产环境 (Podman)..."
+	@test -f infra/prod/.env.master || (echo "错误: 请先创建 infra/prod/.env.master" && exit 1)
+	podman-compose -f infra/prod/master.yml --env-file infra/prod/.env.master up -d
 
-dev-up:
-	docker compose -f docker-compose.dev.yml up -d
+# Worker 生产环境
+prod-worker:
+	@echo "启动 Worker 生产环境 (Podman)..."
+	@test -f infra/prod/.env.worker || (echo "错误: 请先创建 infra/prod/.env.worker" && exit 1)
+	podman-compose -f infra/prod/worker.yml --env-file infra/prod/.env.worker up -d
 
-dev-down:
-	docker compose -f docker-compose.dev.yml down
-
-dev-build:
-	docker compose -f docker-compose.dev.yml build
-
-dev-logs:
-	docker compose -f docker-compose.dev.yml logs -f
-
-dev-logs-backend:
-	docker compose -f docker-compose.dev.yml logs -f backend
-
-dev-logs-frontend:
-	docker compose -f docker-compose.dev.yml logs -f frontend
-
-dev-logs-db:
-	docker compose -f docker-compose.dev.yml logs -f db
-
-dev-logs-worker:
-	docker compose -f docker-compose.dev.yml logs -f worker
-
-dev-logs-codeserver:
-	docker compose -f docker-compose.dev.yml logs -f code-server
-
-dev-restart:
-	docker compose -f docker-compose.dev.yml restart
-
-dev-restart-backend:
-	docker compose -f docker-compose.dev.yml restart backend
-
-dev-restart-frontend:
-	docker compose -f docker-compose.dev.yml restart frontend
-
-dev-restart-codeserver:
-	docker compose -f docker-compose.dev.yml restart code-server
-
-# ==================== Production Environment ====================
-
-prod:
-	docker compose -f docker-compose.yml up
-
-prod-up:
-	docker compose -f docker-compose.yml up -d
-
-prod-down:
-	docker compose -f docker-compose.yml down
-
-prod-logs:
-	docker compose -f docker-compose.yml logs -f
-
+# 构建生产镜像
 prod-build:
-	docker compose -f docker-compose.yml build
+	@echo "构建生产镜像..."
+	podman-compose -f infra/prod/master.yml --env-file infra/prod/.env.master build
+	podman-compose -f infra/prod/worker.yml --env-file infra/prod/.env.worker build
 
-# ==================== Cleanup ====================
+# 停止所有生产环境
+prod-down:
+	-podman-compose -f infra/prod/master.yml --env-file infra/prod/.env.master down
+	-podman-compose -f infra/prod/worker.yml --env-file infra/prod/.env.worker down
+
+# =============================================================================
+# 日志
+# =============================================================================
+
+logs:
+	@echo "选择要查看的日志:"
+	@echo "  make logs-dev-master   开发 Master 日志"
+	@echo "  make logs-dev-worker   开发 Worker 日志"
+	@echo "  make logs-prod-master  生产 Master 日志"
+	@echo "  make logs-prod-worker  生产 Worker 日志"
+
+logs-dev-master:
+	docker compose -f infra/dev/master.yml --env-file infra/dev/.env.master logs -f
+
+logs-dev-worker:
+	docker compose -f infra/dev/worker.yml --env-file infra/dev/.env.worker logs -f
+
+logs-prod-master:
+	podman-compose -f infra/prod/master.yml --env-file infra/prod/.env.master logs -f
+
+logs-prod-worker:
+	podman-compose -f infra/prod/worker.yml --env-file infra/prod/.env.worker logs -f
+
+# =============================================================================
+# 清理
+# =============================================================================
 
 clean:
-	docker compose -f docker-compose.dev.yml down --rmi local
-	docker compose -f docker-compose.yml down --rmi local
+	@echo "停止并清理所有容器..."
+	-docker compose -f infra/dev/master.yml --env-file infra/dev/.env.master down -v --rmi local
+	-docker compose -f infra/dev/worker.yml --env-file infra/dev/.env.worker down -v --rmi local
+	-podman-compose -f infra/prod/master.yml --env-file infra/prod/.env.master down -v --rmi local
+	-podman-compose -f infra/prod/worker.yml --env-file infra/prod/.env.worker down -v --rmi local
 
-clean-volumes:
-	docker compose -f docker-compose.dev.yml down -v
-	docker compose -f docker-compose.yml down -v
-	@echo "WARNING: All volumes have been removed!"
+clean-data:
+	@echo "警告: 这将删除所有数据 (数据库, 项目, 数据集等)"
+	@read -p "确定要继续吗? [y/N] " confirm && [ "$$confirm" = "y" ]
+	rm -rf data/

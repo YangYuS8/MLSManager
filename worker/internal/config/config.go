@@ -26,12 +26,16 @@ type Config struct {
 	// Paths
 	StoragePath   string `env:"AGENT_STORAGE_PATH" envDefault:"/data"`
 	DatasetsPath  string `env:"AGENT_DATASETS_PATH" envDefault:"/data/datasets"`
+	ProjectsPath  string `env:"AGENT_PROJECTS_PATH" envDefault:"/data/projects"`
 	JobsWorkspace string `env:"AGENT_JOBS_WORKSPACE" envDefault:"/data/jobs"`
 	LogPath       string `env:"AGENT_LOG_PATH" envDefault:"/var/log/ml-agent"`
 
 	// Token management
 	AgentToken string `env:"AGENT_TOKEN"`
 	TokenFile  string `env:"AGENT_TOKEN_FILE" envDefault:"/etc/ml-agent/token"`
+
+	// API server
+	APIPort int `env:"AGENT_API_PORT" envDefault:"8081"`
 
 	// Development mode
 	DevMode bool `env:"AGENT_DEV_MODE" envDefault:"false"`

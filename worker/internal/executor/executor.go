@@ -11,8 +11,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/YangYuS8/mlsmanager-worker-agent/internal/client"
-	"github.com/YangYuS8/mlsmanager-worker-agent/internal/config"
+	"github.com/YangYuS8/mlsmanager-worker/internal/client"
+	"github.com/YangYuS8/mlsmanager-worker/internal/config"
 )
 
 // JobResult represents the result of a job execution.
@@ -23,7 +23,7 @@ type JobResult struct {
 
 // Executor executes jobs in various environments.
 type Executor struct {
-	cfg         *config.Config
+	cfg          *config.Config
 	masterClient *client.MasterClient
 
 	mu          sync.Mutex
@@ -33,9 +33,9 @@ type Executor struct {
 // NewExecutor creates a new job executor.
 func NewExecutor(cfg *config.Config, masterClient *client.MasterClient) *Executor {
 	return &Executor{
-		cfg:         cfg,
+		cfg:          cfg,
 		masterClient: masterClient,
-		runningJobs: make(map[int]*exec.Cmd),
+		runningJobs:  make(map[int]*exec.Cmd),
 	}
 }
 

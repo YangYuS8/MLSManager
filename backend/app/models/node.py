@@ -40,9 +40,17 @@ class Node(Base):
     name: Mapped[str] = mapped_column(String(100))
     node_type: Mapped[str] = mapped_column(String(20), default=NodeType.WORKER.value)
     host: Mapped[str] = mapped_column(String(255))
+    hostname: Mapped[str | None] = mapped_column(String(255))  # Hostname for agent communication
     port: Mapped[int] = mapped_column(Integer, default=8000)
     status: Mapped[str] = mapped_column(String(20), default=NodeStatus.OFFLINE.value)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+
+    # Agent configuration
+    agent_port: Mapped[int | None] = mapped_column(Integer, default=8081)  # Worker HTTP API port
+    agent_token: Mapped[str | None] = mapped_column(String(255))  # Agent authentication token
+
+    # Code-server configuration (for project editing)
+    code_server_port: Mapped[int | None] = mapped_column(Integer, default=8443)
 
     # Hardware info (reported by agent)
     cpu_count: Mapped[int | None] = mapped_column(Integer)

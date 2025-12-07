@@ -143,5 +143,23 @@ logs/
 .env.local
 .env.*.local
 
-# Code-server local config (development only)
+# =============================================================================
+# Infrastructure
+# =============================================================================
+
+# 数据目录 (数据库, 项目, 数据集等)
+/data/
+
+# 旧的 code-server 配置 (已迁移到 /data/)
 .code-server/
+
+# 环境变量文件 (包含敏感信息)
+# 只提交 .example 模板
+infra/dev/.env.master
+infra/dev/.env.worker
+infra/prod/.env.master
+infra/prod/.env.worker
+
+# 旧的配置文件 (待删除)
+infra/.env.worker
+infra/.env.worker.dev

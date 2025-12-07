@@ -9,8 +9,8 @@
 - [x] 2.3 移除 docker-compose 中的硬编码环境变量，改用变量引用
 
 ## 3. 更新 Dockerfile
-- [x] 3.1 清理 `worker_agent/Dockerfile` 中的默认环境变量
-- [x] 3.2 清理 `worker_agent/Dockerfile.dev` 中的默认环境变量
+- [x] 3.1 清理 `worker/Dockerfile` 中的默认环境变量
+- [x] 3.2 清理 `worker/Dockerfile.dev` 中的默认环境变量
 
 ## 4. 更新 Makefile
 - [x] 4.1 本地开发命令从 `.env.dev` 加载环境变量

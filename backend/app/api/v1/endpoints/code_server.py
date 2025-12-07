@@ -7,9 +7,11 @@ from urllib.parse import quote
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from app.api.deps import CurrentUser, DbSession
 from app.core.config import settings
+from app.models.node import Node
 from app.models.project import Project
 
 logger = logging.getLogger(__name__)
@@ -23,6 +25,8 @@ class CodeServerURLResponse(BaseModel):
     url: str
     project_name: str
     workspace_path: str
+    node_name: str | None = None
+    node_host: str | None = None
 
 
 class CodeServerStatusResponse(BaseModel):
@@ -33,11 +37,28 @@ class CodeServerStatusResponse(BaseModel):
     base_url: str
 
 
+def get_code_server_url_for_node(node: Node | None) -> str:
+    """
+    Get the code-server URL for a specific node.
+    
+    If node is None, falls back to local code-server configuration.
+    """
+    if node:
+        # Use node's hostname (for network access) and code-server port
+        # hostname is the address used to reach the node (localhost in dev, actual IP/hostname in prod)
+        host = node.hostname or node.host
+        port = node.code_server_port or 8443
+    else:
+        # Fallback to local configuration (for backward compatibility)
+        host = os.getenv("CODE_SERVER_HOST", "localhost")
+        port = int(os.getenv("CODE_SERVER_PORT", "8443"))
+    
+    return f"http://{host}:{port}"
+
+
 def get_code_server_base_url() -> str:
-    """Get the base URL for code-server."""
+    """Get the base URL for local code-server (backward compatibility)."""
     port = os.getenv("CODE_SERVER_PORT", "8443")
-    # In development, code-server is on localhost
-    # In production, this should be configured via environment
     host = os.getenv("CODE_SERVER_HOST", "localhost")
     return f"http://{host}:{port}"
 
@@ -122,7 +143,8 @@ async def get_code_server_status(
     description="""
     Generate a code-server URL for editing a specific project.
     
-    The URL will open code-server with the project folder pre-selected.
+    The URL will open code-server on the node where the project is stored.
+    Each worker node runs its own code-server instance.
     User must authenticate with code-server separately (first time only).
     """,
     responses={
@@ -140,9 +162,14 @@ async def get_project_editor_url(
     Get the code-server URL for a project.
     
     The returned URL opens code-server with the project folder.
+    The URL points to the code-server instance on the project's node.
     """
-    # Fetch project
-    result = await db.execute(select(Project).where(Project.id == project_id))
+    # Fetch project with node relationship
+    result = await db.execute(
+        select(Project)
+        .options(selectinload(Project.node))
+        .where(Project.id == project_id)
+    )
     project = result.scalar_one_or_none()
     
     if not project:
@@ -164,17 +191,27 @@ async def get_project_editor_url(
     workspace_path = get_project_workspace_path(project.local_path)
     logger.info(f"Project {project.id} local_path: {project.local_path} -> workspace_path: {workspace_path}")
     
+    # Get node information for code-server URL
+    node = project.node
+    node_name = node.name if node else None
+    node_host = node.host if node else None
+    
     # Build code-server URL with folder parameter
-    base_url = get_code_server_base_url()
+    # URL points to code-server on the project's node
+    base_url = get_code_server_url_for_node(node)
     
     # URL encode the folder path
     encoded_path = quote(workspace_path, safe="")
     url = f"{base_url}/?folder={encoded_path}"
     
+    logger.info(f"Generated code-server URL for project {project.id}: {url} (node: {node_name})")
+    
     return CodeServerURLResponse(
         url=url,
         project_name=project.name,
         workspace_path=workspace_path,
+        node_name=node_name,
+        node_host=node_host,
     )
 
 

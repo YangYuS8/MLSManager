@@ -22,5 +22,5 @@
   - `Makefile` - 本地开发命令从 .env.dev 加载变量
   - `docker-compose.dev.yml` - 统一使用 env_file
   - `docker-compose.yml` - 使用 env_file 引用 .env
-  - `worker_agent/Dockerfile` - 移除硬编码默认值
-  - `worker_agent/Dockerfile.dev` - 移除硬编码默认值
+  - `worker/Dockerfile` - 移除硬编码默认值
+  - `worker/Dockerfile.dev` - 移除硬编码默认值

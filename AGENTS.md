@@ -99,7 +99,7 @@ uv run ruff format .  # format Python code
 ### Worker Agent Commands (Go)
 
 ```bash
-cd worker_agent
+cd worker
 go mod download       # install dependencies
 go run ./cmd/agent    # run agent
 go build -o agent ./cmd/agent  # build binary
@@ -124,7 +124,7 @@ make prod-build       # build production images
 /                  # project root
   /backend/         # FastAPI + API + job & node logic + database / ORM + agent interface
   /frontend/        # React + TS + Ant Design + Tailwind + UI components / pages
-  /worker_agent/    # Go-based worker node agent: dataset scan / metadata report / job launch / status sync
+  /worker/    # Go-based worker node agent: dataset scan / metadata report / job launch / status sync
   /infra/           # docker‑compose files, deployment / startup / registration scripts, configs, .env.example
   /docs/            # design docs, architecture diagrams, usage guides, README, CONTRIBUTING, etc.
   Makefile          # unified development commands

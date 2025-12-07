@@ -10,8 +10,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/YangYuS8/mlsmanager-worker-agent/internal/config"
-	"github.com/YangYuS8/mlsmanager-worker-agent/internal/sysinfo"
+	"github.com/YangYuS8/mlsmanager-worker/internal/config"
+	"github.com/YangYuS8/mlsmanager-worker/internal/sysinfo"
 )
 
 // MasterClient communicates with the master node.
@@ -54,7 +54,9 @@ type RegisterRequest struct {
 	NodeID         string  `json:"node_id"`
 	Name           string  `json:"name"`
 	Host           string  `json:"host"`
+	Hostname       string  `json:"hostname,omitempty"`
 	Port           int     `json:"port"`
+	AgentPort      int     `json:"agent_port"`
 	StoragePath    *string `json:"storage_path,omitempty"`
 	CPUCount       int     `json:"cpu_count"`
 	MemoryTotalGB  *int    `json:"memory_total_gb"`
@@ -75,12 +77,21 @@ type RegisterResponse struct {
 func (c *MasterClient) Register(ctx context.Context) error {
 	sysInfo := sysinfo.Collect(c.cfg.StoragePath)
 
+	// Determine the hostname for backend to reach this worker
+	// In dev mode, use localhost; otherwise use actual hostname
+	hostname := c.cfg.NodeHostname
+	if c.cfg.DevMode {
+		hostname = "localhost"
+	}
+
 	storagePath := c.cfg.StoragePath
 	req := RegisterRequest{
 		NodeID:         c.cfg.NodeName, // Use node name as ID
 		Name:           c.cfg.NodeName,
 		Host:           c.cfg.NodeHostname,
+		Hostname:       hostname,
 		Port:           8001,
+		AgentPort:      c.cfg.APIPort,
 		StoragePath:    &storagePath,
 		CPUCount:       sysInfo.CPUCount,
 		MemoryTotalGB:  sysInfo.MemoryTotalGB,
@@ -207,6 +218,24 @@ func (c *MasterClient) ReportDatasets(ctx context.Context, datasets []DatasetInf
 
 	req := ReportDatasetsRequest{Datasets: datasets}
 	return c.doRequest(ctx, "POST", "/api/v1/datasets/batch", req, nil, true)
+}
+
+// ProjectStatusUpdate represents a project status update request.
+type ProjectStatusUpdate struct {
+	Status    string `json:"status"`
+	Message   string `json:"message,omitempty"`
+	LocalPath string `json:"local_path,omitempty"`
+}
+
+// UpdateProjectStatus updates a project's status on the master.
+func (c *MasterClient) UpdateProjectStatus(ctx context.Context, projectID int64, status, message, localPath string) error {
+	req := ProjectStatusUpdate{
+		Status:    status,
+		Message:   message,
+		LocalPath: localPath,
+	}
+	path := fmt.Sprintf("/api/v1/internal/projects/%d/status", projectID)
+	return c.doRequest(ctx, "POST", path, req, nil, true)
 }
 
 // doRequest performs an HTTP request.

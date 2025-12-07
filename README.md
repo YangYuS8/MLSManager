@@ -67,7 +67,7 @@ Open http://localhost:5173 in your browser.
 #### Worker Agent
 
 ```bash
-cd worker_agent
+cd worker
 uv sync
 uv run python agent.py
 ```
@@ -128,7 +128,7 @@ docker-compose logs -f
 │   ├── openapi-ts.config.ts # OpenAPI codegen configuration
 │   ├── package.json
 │   └── vite.config.ts
-├── worker_agent/           # Worker node agent
+├── worker/           # Worker node agent
 │   ├── agent.py            # Main agent script
 │   ├── pyproject.toml      # Python dependencies (uv)
 │   └── Dockerfile

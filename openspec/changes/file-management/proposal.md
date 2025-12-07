@@ -120,7 +120,7 @@ frontend/src/
 - `backend/app/api/v1/router.py` - 添加文件路由
 - `frontend/src/layouts/BasicLayout.tsx` - 添加文件管理菜单
 - `frontend/src/locales/*.json` - 添加国际化文本
-- `worker_agent/` - 扩展文件操作支持
+- `worker/` - 扩展文件操作支持
 
 ### 依赖
 - 前端: `@monaco-editor/react` (代码编辑器)

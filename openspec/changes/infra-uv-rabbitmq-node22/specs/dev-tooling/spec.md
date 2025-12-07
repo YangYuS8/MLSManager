@@ -1,14 +1,14 @@
 ## MODIFIED Requirements
 
 ### Requirement: Python Package Management
-All Python components (backend, worker_agent) SHALL use uv as the package manager for dependency management, virtual environment creation, and script execution.
+All Python components (backend, worker) SHALL use uv as the package manager for dependency management, virtual environment creation, and script execution.
 
 #### Scenario: Backend dependency sync
 - **WHEN** developer runs `uv sync` in backend directory
 - **THEN** all dependencies are installed successfully without errors
 
 #### Scenario: Worker agent dependency sync
-- **WHEN** developer runs `uv sync` in worker_agent directory
+- **WHEN** developer runs `uv sync` in worker directory
 - **THEN** all dependencies are installed successfully
 
 ### Requirement: Task Queue Infrastructure

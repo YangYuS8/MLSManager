@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 class ProjectStatus(str, Enum):
     """Project status enumeration."""
 
+    PENDING = "pending"  # Waiting for worker to start clone
     ACTIVE = "active"
     ARCHIVED = "archived"
     SYNCING = "syncing"
