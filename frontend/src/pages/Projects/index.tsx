@@ -15,6 +15,7 @@ import {
   Switch,
   Typography,
   Badge,
+  Spin,
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import {
@@ -28,6 +29,7 @@ import {
   GithubOutlined,
   SearchOutlined,
   CodeOutlined,
+  ExportOutlined,
 } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
@@ -116,6 +118,32 @@ const Projects: React.FC = () => {
     fetchProjects()
     fetchNodes()
   }, [fetchProjects, fetchNodes])
+
+  // Open code-server for project editing
+  const handleOpenEditor = async (project: Project) => {
+    try {
+      message.loading({ content: t('projects.openingEditor'), key: 'editor' })
+      
+      const response = await fetch(`/api/v1/code-server/url/${project.id}`, {
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        message.success({ content: t('projects.editorOpened'), key: 'editor' })
+        // Open code-server in new tab
+        window.open(data.url, `code-server-${project.id}`)
+      } else {
+        const error = await response.json()
+        message.error({ content: error.detail || t('projects.editorFailed'), key: 'editor' })
+      }
+    } catch (err) {
+      console.error('Failed to open editor:', err)
+      message.error({ content: t('projects.editorFailed'), key: 'editor' })
+    }
+  }
 
   const handleCreate = async (values: Record<string, unknown>) => {
     try {
@@ -291,8 +319,10 @@ const Projects: React.FC = () => {
               type="primary"
               size="small"
               icon={<CodeOutlined />}
-              onClick={() => navigate(`/projects/${record.id}/editor`)}
-            />
+              onClick={() => handleOpenEditor(record)}
+            >
+              <ExportOutlined style={{ fontSize: '10px', marginLeft: '2px' }} />
+            </Button>
           </Tooltip>
           {record.git_url && (
             <>
