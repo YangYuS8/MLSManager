@@ -48,7 +48,7 @@
   - Test authentication flow
   - Test file operations within project bounds
 
-- [ ] **4.2** Commit all changes
+- [x] **4.2** Commit all changes
 
 ## Dependencies
 - Docker image: `codercom/code-server:latest`
